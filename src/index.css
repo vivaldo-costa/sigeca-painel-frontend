@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+/* ============================================================
+   SIGECA — Painel de Gestao — Design Tokens
+   Identidade propria, distinta do Portal do Escuteiro: dashboard
+   denso e neutro para uso interno de dirigentes (ADMIN/GESTOR/
+   CONSULTOR), fiel ao dashboard.php actual (:root do painel).
+   ============================================================ */
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  /* Superficies e texto */
+  --color-bg:      #f7f8fa;
+  --color-surface: #ffffff;
+  --color-border:  #e8eaed;
+  --color-text:    #111827;
+  --color-muted:   #6b7280;
+  --color-subtle:  #9ca3af;
+
+  /* Paleta categorica para graficos (c1-c8 do dashboard actual) */
+  --color-c1: #3b6fd4;
+  --color-c2: #0f8f6c;
+  --color-c3: #7655c8;
+  --color-c4: #c47a1e;
+  --color-c5: #b84040;
+  --color-c6: #2e8fa3;
+  --color-c7: #5a6e8c;
+  --color-c8: #7a6031;
+
+  /* Badges de estado (bdg-b/g/o/v do original) */
+  --color-badge-blue-bg:   #eff6ff;
+  --color-badge-blue-text: #1d4ed8;
+  --color-badge-green-bg:   #f0fdf4;
+  --color-badge-green-text: #166534;
+  --color-badge-orange-bg:   #fff7ed;
+  --color-badge-orange-text: #9a3412;
+  --color-badge-violet-bg:   #f5f3ff;
+  --color-badge-violet-text: #5b21b6;
+  --color-badge-red-bg:   #fef2f2;
+  --color-badge-red-text: #b91c1c;
+
+  --radius-pn: 10px;
+  --shadow-pn: 0 1px 2px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.04);
+
+  --width-sidebar: 240px;
+  --width-sidebar-collapsed: 56px;
+}
+
+@layer base {
+  * { box-sizing: border-box; }
+  html, body {
+    font-family: var(--font-sans);
+    background: var(--color-bg);
+    color: var(--color-text);
+  }
+  /* Base suave para qualquer elemento interactivo — hovers e focus deixam
+     de ser instantâneos em todo o lado, sem ter de repetir "transition"
+     manualmente em cada componente. */
+  a, button, input, select, textarea {
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease,
+                opacity 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+  .skel {
+    background: linear-gradient(90deg,#ebebeb 25%,#f5f5f5 50%,#ebebeb 75%);
+    background-size: 200% 100%;
+    animation: shim 1.5s infinite;
+    border-radius: 6px;
+  }
+  @keyframes shim {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Animações de entrada reutilizáveis — usar como classe directa
+     (animate-fade-in, animate-slide-up, animate-scale-in). Páginas e
+     cartões usam-nas ao aparecer; modais usam scale-in; listas usam
+     fade-in com atraso escalonado via style={{ animationDelay }}. */
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .animate-fade-in { animation: fade-in 0.25s ease-out both; }
+  .animate-slide-up { animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .animate-scale-in { animation: scale-in 0.18s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  /* Cartões e linhas clicáveis — leve elevação/realce ao pairar o rato,
+     dá feedback de "isto é interactivo" sem exagerar. */
+  .hover-lift { transition: transform 150ms ease, box-shadow 150ms ease; }
+  .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+}
