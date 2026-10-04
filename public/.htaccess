@@ -1,0 +1,10 @@
+# SPA (React Router): qualquer rota que não seja um ficheiro/pasta real
+# cai sempre no index.html, para o React Router é que decide o que mostrar.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
