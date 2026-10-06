@@ -1,3 +1,4 @@
+import { copiarLinkProduto } from '@/lib/linkProduto'
 import { useState, type FormEvent } from 'react'
 import { X, Loader2, Plus, Trash2, ImagePlus, Images } from 'lucide-react'
 import {
@@ -153,7 +154,10 @@ export function ModalProdutoForm({ produto, onClose }: Props) {
       if (produto) {
         await atualizar.mutateAsync({ id: produto.id, payload: form, imagem })
       } else {
-        await criar.mutateAsync({ payload: form, imagem })
+        const resposta = await criar.mutateAsync({ payload: form, imagem })
+        const novoId = (resposta as { dados?: { id?: number } })?.dados?.id
+        // Gera logo o link externo do produto (para as redes sociais) e copia-o.
+        if (novoId) await copiarLinkProduto(novoId)
       }
       onClose()
     } catch (err) {

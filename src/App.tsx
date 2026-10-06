@@ -59,6 +59,7 @@ import { TesourariaPage } from '@/pages/tesouraria/TesourariaPage'
 import { InventarioPage } from '@/pages/inventario/InventarioPage'
 import { RegularizacaoCensoLista } from '@/pages/pagamentoCenso/RegularizacaoCensoLista'
 import { CertificadosLista } from '@/pages/certificados/CertificadosLista'
+import { CertificadoModelosPage } from '@/pages/certificados/CertificadoModelosPage'
 import { AcampamentosLista } from '@/pages/acampamentos/AcampamentosLista'
 import { EventoDetalhePage } from '@/pages/acampamentos/EventoDetalhePage'
 import { CatalogoFormacoesLista } from '@/pages/catalogoFormacoes/CatalogoFormacoesLista'
@@ -167,6 +168,7 @@ export default function App() {
         <Route path="/tesouraria" element={<TesourariaPage />} />
         <Route path="/inventario" element={<InventarioPage />} />
         <Route path="/certificados" element={<CertificadosLista />} />
+        <Route path="/certificados/modelos" element={<CertificadoModelosPage />} />
         <Route path="/acampamentos" element={<AcampamentosLista />} />
         <Route path="/acampamentos/:id" element={<EventoDetalhePage />} />
         <Route path="/catalogo-formacoes" element={<CatalogoFormacoesLista />} />

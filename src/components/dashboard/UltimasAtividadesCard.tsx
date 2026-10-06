@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { CalendarDays, GraduationCap, ArrowRight } from 'lucide-react'
+import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import type { AtividadeRecente } from '@/types/dashboard'
 
@@ -8,9 +9,19 @@ export function UltimasAtividadesCard({ atividades }: { atividades: AtividadeRec
     <Card>
       <CardHeader className="flex items-center justify-between">
         <h3 className="text-[13.5px] font-semibold text-text">Últimas Actividades</h3>
-        <Link to="/eventos" className="flex items-center gap-1 text-[11.5px] font-medium text-muted hover:text-text">
-          Ver todas <ArrowRight className="size-3" />
-        </Link>
+        <div className="flex items-center gap-2">
+          <ExportarBotoes tamanho="sm" nomeFicheiro="ultimas-actividades" titulo="Últimas Actividades"
+            colunas={[
+              { titulo: 'Tipo', valor: (a: AtividadeRecente) => (a.tipo === 'formacao' ? 'Formação' : 'Actividade') },
+              { titulo: 'Título', valor: (a: AtividadeRecente) => a.titulo },
+              { titulo: 'Local', valor: (a: AtividadeRecente) => a.local ?? '—' },
+              { titulo: 'Início', valor: (a: AtividadeRecente) => (a.data_inicio ? new Date(a.data_inicio).toLocaleDateString('pt-PT') : '—') },
+            ]}
+            linhas={atividades} />
+          <Link to="/eventos" className="flex items-center gap-1 text-[11.5px] font-medium text-muted hover:text-text">
+            Ver todas <ArrowRight className="size-3" />
+          </Link>
+        </div>
       </CardHeader>
       <CardBody className="space-y-1">
         {atividades.length === 0 && <p className="py-6 text-center text-[13px] text-subtle">Nenhuma actividade recente.</p>}

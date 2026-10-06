@@ -3,7 +3,7 @@ import { X, Loader2 } from 'lucide-react'
 import { useCriarCensoPeriodo } from '@/hooks/useCenso'
 import { getApiErrorMessage } from '@/lib/api'
 import { Button } from '@/components/ui/Button'
-import { Campo, Linha2, TextField } from '@/components/crud/FormShell'
+import { Campo, Linha2, NumeroField, TextField } from '@/components/crud/FormShell'
 import type { CensoPeriodoFormPayload } from '@/types/censo'
 import { notificar } from '@/lib/notificar'
 
@@ -35,10 +35,10 @@ export function ModalCensoPeriodoForm({ onClose }: { onClose: () => void }) {
             <Campo label="Fim"><TextField type="date" required value={form.data_fim} onChange={(e) => setForm((f) => ({ ...f, data_fim: e.target.value }))} /></Campo>
           </Linha2>
           <Campo label="Valor do Censo por membro (Kz)">
-            <TextField
-              type="number" step="0.01" min="0" placeholder="0.00"
+            <NumeroField
+              decimal placeholder="0.00"
               value={form.valor_por_membro}
-              onChange={(e) => setForm((f) => ({ ...f, valor_por_membro: e.target.value }))}
+              onValor={(v) => setForm((f) => ({ ...f, valor_por_membro: v }))}
             />
           </Campo>
           <div className="flex gap-3 pt-2">

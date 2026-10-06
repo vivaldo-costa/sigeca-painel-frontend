@@ -5,15 +5,6 @@ import type { CamposAdicionaisUtilizadorValores } from '@/types/utilizador'
 const SACRAMENTOS_DISPONIVEIS = ['Baptismo', 'Comunhão', 'Crisma', 'Matrimônio', 'Ordem', 'Consagrada']
 const GRUPOS_SANGUINEOS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
 
-const DOCS: { chave: keyof CamposAdicionaisUtilizadorValores; label: string; icone: string }[] = [
-  { chave: 'docs_bi', label: 'Bilhete de Identidade', icone: 'fa-solid fa-id-card' },
-  { chave: 'docs_foto', label: 'Fotografia', icone: 'fa-solid fa-image' },
-  { chave: 'docs_matricula', label: 'Comprovativo de matrícula', icone: 'fa-solid fa-graduation-cap' },
-  { chave: 'docs_cartao_sacramentos', label: 'Cartão dos sacramentos', icone: 'fa-solid fa-cross' },
-  { chave: 'docs_cartao_residente', label: 'Cartão de residente', icone: 'fa-solid fa-house' },
-  { chave: 'docs_taxa_pagamento', label: 'Comprovativo de pagamento da taxa', icone: 'fa-solid fa-money-check-dollar' },
-]
-
 interface SeccaoProps {
   valores: CamposAdicionaisUtilizadorValores
   onChange: (patch: Partial<CamposAdicionaisUtilizadorValores>) => void
@@ -22,18 +13,9 @@ interface SeccaoProps {
 export function SeccaoIdentificacao({ valores, onChange }: SeccaoProps) {
   return (
     <>
-      <Linha2>
-        <Campo label="Tipo de Inscrição">
-          <SelectField value={valores.tipo_inscricao} onChange={(e) => onChange({ tipo_inscricao: e.target.value as CamposAdicionaisUtilizadorValores['tipo_inscricao'] })}>
-            <option value="">-- Seleccionar --</option>
-            <option value="Novo">Novo</option>
-            <option value="Antigo">Antigo</option>
-          </SelectField>
-        </Campo>
-        <Campo label="Bilhete de Identidade">
-          <TextField value={valores.bilhete_identidade} onChange={(e) => onChange({ bilhete_identidade: e.target.value })} />
-        </Campo>
-      </Linha2>
+      <Campo label="Bilhete de Identidade">
+        <TextField value={valores.bilhete_identidade} onChange={(e) => onChange({ bilhete_identidade: e.target.value })} />
+      </Campo>
       <Linha2>
         <Campo label="Naturalidade">
           <TextField value={valores.naturalidade} onChange={(e) => onChange({ naturalidade: e.target.value })} placeholder="Ex.: Luanda" />
@@ -162,20 +144,6 @@ export function SeccaoEndereco({ valores, onChange }: SeccaoProps) {
 export function SeccaoDocumentos({ valores, onChange }: SeccaoProps) {
   return (
     <>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {DOCS.map(({ chave, label, icone }) => (
-          <label key={chave} className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-[12.5px] text-text hover:bg-bg">
-            <input
-              type="checkbox"
-              className="size-3.5"
-              checked={Boolean(valores[chave])}
-              onChange={(e) => onChange({ [chave]: e.target.checked } as Partial<CamposAdicionaisUtilizadorValores>)}
-            />
-            <i className={`${icone} w-3.5 text-center text-[11px] text-subtle`} />
-            {label}
-          </label>
-        ))}
-      </div>
       <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-[12.5px] font-medium text-text hover:bg-bg">
         <input
           type="checkbox"
@@ -205,11 +173,11 @@ function contarPreenchidos(valores: CamposAdicionaisUtilizadorValores, campos: (
   }).length
 }
 
-const CAMPOS_IDENTIFICACAO: (keyof CamposAdicionaisUtilizadorValores)[] = ['tipo_inscricao', 'bilhete_identidade', 'naturalidade', 'nacionalidade', 'grupo_sanguineo', 'alergias_restricoes']
+const CAMPOS_IDENTIFICACAO: (keyof CamposAdicionaisUtilizadorValores)[] = ['bilhete_identidade', 'naturalidade', 'nacionalidade', 'grupo_sanguineo', 'alergias_restricoes']
 const CAMPOS_ESCUTISMO: (keyof CamposAdicionaisUtilizadorValores)[] = ['sacramento', 'data_promessa', 'tempo_permanencia', 'cargo_funcao', 'participacao_grupos_paroquiais']
 const CAMPOS_ENCARREGADO: (keyof CamposAdicionaisUtilizadorValores)[] = ['encarregado_nome', 'encarregado_grau_parentesco', 'encarregado_telefone', 'encarregado_email', 'autorizacao_encarregado']
 const CAMPOS_ENDERECO: (keyof CamposAdicionaisUtilizadorValores)[] = ['endereco', 'bairro', 'municipio', 'provincia']
-const CAMPOS_DOCUMENTOS: (keyof CamposAdicionaisUtilizadorValores)[] = ['docs_bi', 'docs_foto', 'docs_matricula', 'docs_cartao_sacramentos', 'docs_cartao_residente', 'docs_taxa_pagamento', 'termo_compromisso']
+const CAMPOS_DOCUMENTOS: (keyof CamposAdicionaisUtilizadorValores)[] = ['termo_compromisso', 'assinatura', 'data_assinatura']
 
 function resumo(n: number, total: number) {
   return n === 0 ? 'Por preencher' : `${n} de ${total} preenchidos`
@@ -237,7 +205,7 @@ export function CamposAdicionaisAccordion({ valores, onChange }: SeccaoProps) {
       <Accordion titulo="Endereço" icone="fa-solid fa-location-dot" resumo={resumo(contarPreenchidos(valores, CAMPOS_ENDERECO), CAMPOS_ENDERECO.length)}>
         <SeccaoEndereco valores={valores} onChange={onChange} />
       </Accordion>
-      <Accordion titulo="Documentos Entregues" icone="fa-solid fa-file-circle-check" resumo={resumo(contarPreenchidos(valores, CAMPOS_DOCUMENTOS), CAMPOS_DOCUMENTOS.length)}>
+      <Accordion titulo="Termo de Compromisso" icone="fa-solid fa-file-circle-check" resumo={resumo(contarPreenchidos(valores, CAMPOS_DOCUMENTOS), CAMPOS_DOCUMENTOS.length)}>
         <SeccaoDocumentos valores={valores} onChange={onChange} />
       </Accordion>
     </div>

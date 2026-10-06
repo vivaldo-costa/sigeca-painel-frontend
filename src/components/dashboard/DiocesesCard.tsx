@@ -1,4 +1,5 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import type { DiocesePainel } from '@/types/dashboard'
 
@@ -7,7 +8,17 @@ export function DiocesesCard({ dioceses }: { dioceses: DiocesePainel[] }) {
 
   return (
     <Card>
-      <CardHeader><h3 className="text-[13.5px] font-semibold text-text">Escuteiros por Diocese</h3></CardHeader>
+      <CardHeader className="flex items-center justify-between gap-2">
+        <h3 className="text-[13.5px] font-semibold text-text">Escuteiros por Diocese</h3>
+        <ExportarBotoes tamanho="sm" nomeFicheiro="escuteiros-por-diocese" titulo="Escuteiros por Diocese (por género)"
+          colunas={[
+            { titulo: 'Diocese', valor: (d: DiocesePainel) => d.diocese },
+            { titulo: 'Masculino', valor: (d: DiocesePainel) => d.masculino },
+            { titulo: 'Feminino', valor: (d: DiocesePainel) => d.feminino },
+            { titulo: 'Total', valor: (d: DiocesePainel) => d.total },
+          ]}
+          linhas={[...dioceses].sort((a, b) => b.total - a.total)} />
+      </CardHeader>
       <CardBody className="h-[300px] p-3">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={dioceses} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>

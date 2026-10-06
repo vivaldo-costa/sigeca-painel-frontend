@@ -12,6 +12,7 @@ import {
 import { CAMPOS_ADICIONAIS_VAZIO, limparDatasOpcionais, type UtilizadorFormPayload } from '@/types/utilizador'
 import { notificar } from '@/lib/notificar'
 import { cn } from '@/lib/cn'
+import { useConfirmar } from '@/components/ui/ConfirmProvider'
 
 // Nunca inclui `codigo_associado` — o Nº SIGECA é sempre gerado
 // automaticamente pelo servidor a partir da diocese/agrupamento + id, e
@@ -44,17 +45,19 @@ export function UtilizadorNovoForm() {
   const [form, setForm] = useState<UtilizadorFormPayload>(VAZIO)
   const [passo, setPasso] = useState(0)
   const [tentouAvancar, setTentouAvancar] = useState(false)
+  const confirmar = useConfirmar()
 
   const dioceses = useOpcoesFiltro('dioceses')
   const vigararias = useOpcoesFiltro('vigararias', form.diocese_id ?? undefined)
   const paroquias = useOpcoesFiltro('paroquias', form.vigararia_id ?? undefined)
   const agrupamentos = useOpcoesFiltro('agrupamentos', form.paroquia_id ?? undefined)
+  const seccoes = useOpcoesFiltro('seccoes')
 
   const ultimoPasso = passo === PASSOS.length - 1
 
   function passoValido(indice: number) {
     if (indice === 0) return form.nome.trim() !== '' && form.data_nascimento !== ''
-    if (indice === 1) return Boolean(form.diocese_id && form.vigararia_id && form.paroquia_id && form.agrupamento_id)
+    if (indice === 1) return Boolean(form.diocese_id && form.vigararia_id && form.paroquia_id && form.agrupamento_id && form.seccao_id)
     return true
   }
 
@@ -85,13 +88,25 @@ export function UtilizadorNovoForm() {
     setPasso((p) => Math.max(p - 1, 0))
   }
 
-  async function handleSubmit(e: FormEvent) {
+  // O formulário NUNCA grava sozinho: Enter num campo ou a mudança do
+  // botão "Seguinte" → "Criar" no último passo não submetem nada. Só o
+  // clique explícito em "Criar Escuteiro", seguido de confirmação, grava.
+  function bloquearSubmissao(e: FormEvent) {
     e.preventDefault()
+  }
+
+  async function criarEscuteiro() {
     if (!passoValido(0) || !passoValido(1)) {
       setTentouAvancar(true)
       irParaPasso(!passoValido(0) ? 0 : 1)
       return
     }
+    const ok = await confirmar({
+      titulo: 'Criar escuteiro',
+      mensagem: `Confirmas a criação do escuteiro "${form.nome.trim()}"? Revê os dados antes de gravar.`,
+      textoConfirmar: 'Sim, criar escuteiro',
+    })
+    if (!ok) return
     try {
       const resposta = await criar.mutateAsync(limparDatasOpcionais(form))
       notificar.sucesso('Escuteiro criado com sucesso.')
@@ -137,7 +152,7 @@ export function UtilizadorNovoForm() {
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4 rounded-[var(--radius-pn)] border border-border bg-surface p-6 shadow-[var(--shadow-pn)]">
+      <form onSubmit={bloquearSubmissao} className="space-y-4 rounded-[var(--radius-pn)] border border-border bg-surface p-6 shadow-[var(--shadow-pn)]">
 
         {passo === 0 && (
           <Passo titulo="Dados Pessoais" descricao="O essencial para identificar o escuteiro.">
@@ -210,11 +225,21 @@ export function UtilizadorNovoForm() {
                 {agrupamentos.data?.map((a) => <option key={a.id} value={a.id}>{formatarAgrupamento(a)}</option>)}
               </SelectField>
             </Campo>
+            <Campo label="Secção / Categoria">
+              <SelectField
+                required
+                value={form.seccao_id ?? ''}
+                onChange={(e) => setForm((f) => ({ ...f, seccao_id: Number(e.target.value) || null }))}
+              >
+                <option value="">-- Seleccionar --</option>
+                {seccoes.data?.map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
+              </SelectField>
+            </Campo>
             <p className="flex items-start gap-1.5 rounded-lg bg-bg px-3 py-2 text-[11.5px] text-muted">
               <i className="fa-solid fa-circle-info mt-0.5 text-subtle" />
               O Nº SIGECA é gerado automaticamente a partir da diocese e do agrupamento assim que o escuteiro for criado.
             </p>
-            {tentouAvancar && !passoValido(1) && <AvisoPasso texto="Selecciona a diocese, vigararia, paróquia e agrupamento." />}
+            {tentouAvancar && !passoValido(1) && <AvisoPasso texto="Selecciona a diocese, vigararia, paróquia, agrupamento e secção/categoria." />}
           </Passo>
         )}
 
@@ -249,11 +274,11 @@ export function UtilizadorNovoForm() {
             </Button>
           )}
           {!ultimoPasso ? (
-            <Button type="button" onClick={seguinte} className="flex-1">
+            <Button key="seguinte" type="button" onClick={seguinte} className="flex-1">
               Seguinte <i className="fa-solid fa-arrow-right" />
             </Button>
           ) : (
-            <Button type="submit" loading={criar.isPending} className="flex-1">
+            <Button key="criar" type="button" onClick={criarEscuteiro} loading={criar.isPending} className="flex-1">
               <i className="fa-solid fa-check" /> Criar Escuteiro
             </Button>
           )}

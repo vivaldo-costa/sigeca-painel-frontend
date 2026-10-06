@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { BadgeCheck, Plus, Loader2, Search, Ban, Download, Copy } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { BadgeCheck, Plus, Loader2, Search, Ban, Download, Copy, FileBadge2 } from 'lucide-react'
 import { useCertificados, useRevogarCertificado } from '@/hooks/useCertificados'
 import { usePermissao } from '@/hooks/usePermissao'
 import { Card } from '@/components/ui/Card'
@@ -52,6 +53,9 @@ export function CertificadosLista() {
           <BadgeCheck className="size-5 text-muted" /> Certificação Digital
         </h1>
         <div className="flex items-center gap-2">
+          <Link to="/certificados/modelos" className="flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-2 text-[12.5px] font-semibold text-text hover:bg-bg">
+            <FileBadge2 className="size-3.5" /> Modelos
+          </Link>
           <ExportarBotoes
             tamanho="sm"
             nomeFicheiro="certificados"

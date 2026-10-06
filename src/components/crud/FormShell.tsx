@@ -69,6 +69,37 @@ export function TextField(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={inputClasses} />
 }
 
+/**
+ * Campo numérico que aceita escrita normal ao teclado (inclusive vírgula
+ * decimal, como em "1500,50"). O `<input type="number">` do browser em
+ * pt-PT rejeitava vírgulas, repunha 0 ao apagar e mudava com a roda do
+ * rato — na prática só dava para usar as setas. Devolve sempre o texto
+ * normalizado (ponto decimal) em `onValor`.
+ */
+export function NumeroField({
+  value, onValor, decimal = false, ...props
+}: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type'> & {
+  value: string | number | null | undefined
+  onValor: (valor: string) => void
+  decimal?: boolean
+}) {
+  return (
+    <input
+      {...props}
+      type="text"
+      inputMode={decimal ? 'decimal' : 'numeric'}
+      autoComplete="off"
+      value={value === null || value === undefined ? '' : String(value)}
+      onChange={(e) => {
+        let v = e.target.value.replace(/\s/g, '').replace(',', '.')
+        v = decimal ? v.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1') : v.replace(/[^0-9]/g, '')
+        onValor(v)
+      }}
+      className={inputClasses}
+    />
+  )
+}
+
 export function SelectField({ children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select {...props} className={inputClasses}>

@@ -1,3 +1,4 @@
+import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import type { AtividadeResumo, VotacaoResumo } from '@/types/dashboard'
 
@@ -25,7 +26,12 @@ export function AtividadesFormacoesVotacoesCard({
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <Card>
-        <CardHeader><h3 className="text-[13.5px] font-semibold text-text">Actividades</h3></CardHeader>
+        <CardHeader className="flex items-center justify-between gap-2">
+          <h3 className="text-[13.5px] font-semibold text-text">Actividades</h3>
+          <ExportarBotoes tamanho="sm" nomeFicheiro="resumo-actividades" titulo="Actividades — resumo"
+            colunas={[{ titulo: 'Título', valor: (x: { titulo: string }) => x.titulo }, { titulo: 'Inscritos', valor: (x: { total_inscritos: number }) => x.total_inscritos }]}
+            linhas={actividades} />
+        </CardHeader>
         <CardBody>
           <Lista
             itens={actividades.map((a) => ({ titulo: a.titulo, valor: a.total_inscritos }))}
@@ -35,7 +41,12 @@ export function AtividadesFormacoesVotacoesCard({
         </CardBody>
       </Card>
       <Card>
-        <CardHeader><h3 className="text-[13.5px] font-semibold text-text">Formações</h3></CardHeader>
+        <CardHeader className="flex items-center justify-between gap-2">
+          <h3 className="text-[13.5px] font-semibold text-text">Formações</h3>
+          <ExportarBotoes tamanho="sm" nomeFicheiro="resumo-formacoes" titulo="Formações — resumo"
+            colunas={[{ titulo: 'Título', valor: (x: { titulo: string }) => x.titulo }, { titulo: 'Inscritos', valor: (x: { total_inscritos: number }) => x.total_inscritos }]}
+            linhas={formacoes} />
+        </CardHeader>
         <CardBody>
           <Lista
             itens={formacoes.map((f) => ({ titulo: f.titulo, valor: f.total_inscritos }))}
@@ -45,7 +56,12 @@ export function AtividadesFormacoesVotacoesCard({
         </CardBody>
       </Card>
       <Card>
-        <CardHeader><h3 className="text-[13.5px] font-semibold text-text">Votações</h3></CardHeader>
+        <CardHeader className="flex items-center justify-between gap-2">
+          <h3 className="text-[13.5px] font-semibold text-text">Votações</h3>
+          <ExportarBotoes tamanho="sm" nomeFicheiro="resumo-votacoes" titulo="Votações — resumo"
+            colunas={[{ titulo: 'Título', valor: (x: { titulo: string }) => x.titulo }, { titulo: 'Votos', valor: (x: { total_votos: number }) => x.total_votos }]}
+            linhas={votacoes} />
+        </CardHeader>
         <CardBody>
           <Lista
             itens={votacoes.map((v) => ({ titulo: v.titulo, valor: v.total_votos }))}

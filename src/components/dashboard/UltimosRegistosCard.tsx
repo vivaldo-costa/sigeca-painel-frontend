@@ -1,3 +1,4 @@
+import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { uploadUrl } from '@/lib/uploads'
 import { formatarAgrupamento } from '@/lib/formatadores'
@@ -6,7 +7,19 @@ import type { UltimoUtilizador } from '@/types/dashboard'
 export function UltimosRegistosCard({ utilizadores }: { utilizadores: UltimoUtilizador[] }) {
   return (
     <Card>
-      <CardHeader><h3 className="text-[13.5px] font-semibold text-text">Últimos Registos</h3></CardHeader>
+      <CardHeader className="flex items-center justify-between gap-2">
+        <h3 className="text-[13.5px] font-semibold text-text">Últimos Registos</h3>
+        <ExportarBotoes tamanho="sm" nomeFicheiro="ultimos-registos" titulo="Últimos Registos de Escuteiros"
+          colunas={[
+            { titulo: 'Nome', valor: (u: UltimoUtilizador) => u.nome },
+            { titulo: 'Código', valor: (u: UltimoUtilizador) => u.codigo_associado },
+            { titulo: 'Diocese', valor: (u: UltimoUtilizador) => u.diocese ?? '—' },
+            { titulo: 'Vigararia', valor: (u: UltimoUtilizador) => u.vigararia ?? '—' },
+            { titulo: 'Agrupamento', valor: (u: UltimoUtilizador) => (u.agrupamento ? formatarAgrupamento({ nome: u.agrupamento, ab_agrupamento: u.ab_agrupamento }) : '—') },
+            { titulo: 'Secção', valor: (u: UltimoUtilizador) => u.seccao_nome ?? '—' },
+          ]}
+          linhas={utilizadores} />
+      </CardHeader>
       <CardBody className="space-y-1">
         {utilizadores.length === 0 ? (
           <p className="py-6 text-center text-[13px] text-subtle">Sem registos recentes.</p>

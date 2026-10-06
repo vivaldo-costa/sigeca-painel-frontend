@@ -1,4 +1,5 @@
 import { Line, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import type { PontoEvolucao } from '@/types/dashboard'
 
@@ -20,7 +21,12 @@ export function EvolucaoEscuteirosCard({ pontos }: { pontos: PontoEvolucao[] }) 
     <Card>
       <CardHeader className="flex items-center justify-between">
         <h3 className="text-[13.5px] font-semibold text-text">Evolução de Escuteiros</h3>
-        <span className="text-[11px] text-subtle">Últimos 12 meses</span>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-subtle">Últimos 12 meses</span>
+          <ExportarBotoes tamanho="sm" nomeFicheiro="evolucao-escuteiros" titulo="Evolução de Escuteiros (últimos 12 meses)"
+            colunas={[{ titulo: 'Mês', valor: (p: PontoEvolucao) => p.mes }, { titulo: 'Total', valor: (p: PontoEvolucao) => p.total }]}
+            linhas={pontos} />
+        </div>
       </CardHeader>
       <CardBody className="h-[300px] p-3">
         <ResponsiveContainer width="100%" height="100%">

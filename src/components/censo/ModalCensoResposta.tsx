@@ -3,7 +3,7 @@ import { X, Loader2 } from 'lucide-react'
 import { useGuardarCensoResposta } from '@/hooks/useCenso'
 import { getApiErrorMessage } from '@/lib/api'
 import { Button } from '@/components/ui/Button'
-import { Campo, Linha2, TextField } from '@/components/crud/FormShell'
+import { Campo, Linha2, NumeroField } from '@/components/crud/FormShell'
 import type { CensoRespostaResumo, CensoRespostaFormPayload } from '@/types/censo'
 import { notificar } from '@/lib/notificar'
 
@@ -46,8 +46,8 @@ export function ModalCensoResposta({ periodoId, resposta, onClose }: Props) {
         <form onSubmit={(e) => submeter('submetido', e)} className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
 
           <Linha2>
-            <Campo label="Nº de Dirigentes"><TextField type="number" min="0" value={form.num_dirigentes} onChange={(e) => setForm((f) => ({ ...f, num_dirigentes: Number(e.target.value) || 0 }))} /></Campo>
-            <Campo label="Nº de Candidatos"><TextField type="number" min="0" value={form.num_candidatos} onChange={(e) => setForm((f) => ({ ...f, num_candidatos: Number(e.target.value) || 0 }))} /></Campo>
+            <Campo label="Nº de Dirigentes"><NumeroField placeholder="0" value={form.num_dirigentes || ""} onValor={(v) => setForm((f) => ({ ...f, num_dirigentes: Number(v) || 0 }))} /></Campo>
+            <Campo label="Nº de Candidatos"><NumeroField placeholder="0" value={form.num_candidatos || ""} onValor={(v) => setForm((f) => ({ ...f, num_candidatos: Number(v) || 0 }))} /></Campo>
           </Linha2>
 
           <div>
@@ -55,7 +55,7 @@ export function ModalCensoResposta({ periodoId, resposta, onClose }: Props) {
             <div className="grid grid-cols-2 gap-3">
               {SECCOES.map((s) => (
                 <Campo key={s} label={s}>
-                  <TextField type="number" min="0" value={form.contagem_seccoes[s] ?? 0} onChange={(e) => alterarSeccao(s, e.target.value)} />
+                  <NumeroField placeholder="0" value={form.contagem_seccoes[s] || ""} onValor={(v) => alterarSeccao(s, v)} />
                 </Campo>
               ))}
             </div>

@@ -20,7 +20,7 @@ export function useDashboardPainel(filtros: FiltrosDashboard) {
 }
 
 /** GET /api/v1/filtros/:nivel — listas { id, nome } para os selects em cascata da FiltrosBar. */
-export function useOpcoesFiltro(nivel: 'dioceses' | 'vigararias' | 'paroquias' | 'agrupamentos', pai?: number) {
+export function useOpcoesFiltro(nivel: 'dioceses' | 'vigararias' | 'paroquias' | 'agrupamentos' | 'seccoes', pai?: number) {
   return useQuery({
     queryKey: ['painel-filtro-opcoes', nivel, pai],
     queryFn: async () => {

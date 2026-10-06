@@ -1,13 +1,26 @@
 import { ArrowRight } from 'lucide-react'
+import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import type { MudancaSeccao } from '@/types/dashboard'
 
 export function MudancaSeccaoTable({ dados }: { dados: MudancaSeccao[] }) {
   return (
     <Card>
-      <CardHeader>
-        <h3 className="text-[13.5px] font-semibold text-text">Sugestões de Mudança de Secção</h3>
-        <p className="mt-0.5 text-[11.5px] text-subtle">Com base na idade actual face às faixas etárias de cada secção</p>
+      <CardHeader className="flex items-start justify-between gap-2">
+        <div>
+          <h3 className="text-[13.5px] font-semibold text-text">Sugestões de Mudança de Secção</h3>
+          <p className="mt-0.5 text-[11.5px] text-subtle">Com base na idade actual face às faixas etárias de cada secção</p>
+        </div>
+        <ExportarBotoes tamanho="sm" nomeFicheiro="sugestoes-mudanca-seccao" titulo="Sugestões de Mudança de Secção"
+          colunas={[
+            { titulo: 'Nome', valor: (m: MudancaSeccao) => m.nome },
+            { titulo: 'Código', valor: (m: MudancaSeccao) => m.codigo_associado },
+            { titulo: 'Idade', valor: (m: MudancaSeccao) => m.idade },
+            { titulo: 'Secção actual', valor: (m: MudancaSeccao) => m.secao_atual ?? '—' },
+            { titulo: 'Nova secção', valor: (m: MudancaSeccao) => m.nova_secao },
+            { titulo: 'Faixa etária', valor: (m: MudancaSeccao) => m.faixas_nova_secao },
+          ]}
+          linhas={dados} />
       </CardHeader>
       <CardBody className="p-0">
         {dados.length === 0 ? (

@@ -83,3 +83,39 @@ export function useRemoverUtilizador() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['painel-utilizadores'] }),
   })
 }
+
+export interface PercursoPayload {
+  seccao_nova_id?: number | null
+  cargo_novo?: string
+  motivo: string
+  data_alteracao?: string
+  apenas_historico?: boolean
+  seccao_anterior_id?: number | null
+  cargo_anterior?: string
+}
+
+/** Regista uma mudança de Secção/Categoria e/ou Função/Cargo no percurso do escuteiro. */
+export function useRegistarPercurso(utilizadorId: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: PercursoPayload) => {
+      const { data } = await api.post(`/utilizadores/${utilizadorId}/percurso`, payload)
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['painel-utilizador-historico', utilizadorId] })
+      queryClient.invalidateQueries({ queryKey: ['painel-utilizador', utilizadorId] })
+      queryClient.invalidateQueries({ queryKey: ['painel-utilizadores'] })
+    },
+  })
+}
+
+export function useRemoverPercurso(utilizadorId: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (registoId: number) => {
+      await api.delete(`/utilizadores/${utilizadorId}/percurso/${registoId}`)
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['painel-utilizador-historico', utilizadorId] }),
+  })
+}

@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Package, Plus, Loader2, Search, Pencil, Trash2, ShoppingBag } from 'lucide-react'
+import { Package, Plus, Loader2, Search, Pencil, Trash2, ShoppingBag, Link2 } from 'lucide-react'
 import { useProdutos, useCategorias, useRemoverProduto } from '@/hooks/useProdutosPainel'
 import { usePermissao } from '@/hooks/usePermissao'
 import { Card } from '@/components/ui/Card'
 import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
 import { ModalProdutoForm } from '@/components/produtos/ModalProdutoForm'
 import { uploadUrl } from '@/lib/uploads'
+import { copiarLinkProduto, linkExternoProduto } from '@/lib/linkProduto'
 import type { FiltrosProdutos, ProdutoPainel } from '@/types/produto'
 
 export function ProdutosLista() {
@@ -127,8 +128,18 @@ export function ProdutosLista() {
               </div>
               <p className="mt-0.5 text-[10.5px] text-subtle sm:text-[11px]">Stock: {p.stock}</p>
 
+              <div className="mt-3 flex gap-2">
+                <button
+                  onClick={() => copiarLinkProduto(p.id)}
+                  title={linkExternoProduto(p.id)}
+                  className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-border py-1.5 text-[11.5px] font-medium text-text transition hover:bg-bg"
+                >
+                  <Link2 className="size-3" /> <span className="hidden sm:inline">Copiar link</span>
+                </button>
+              </div>
+
               {(podeEditar || podeEliminar) && (
-                <div className="mt-3 flex gap-2">
+                <div className="mt-2 flex gap-2">
                   {podeEditar && (
                     <button onClick={() => setModalForm(p)} className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-border py-1.5 text-[11.5px] font-medium text-text transition hover:bg-bg">
                       <Pencil className="size-3" /> <span className="hidden sm:inline">Editar</span>

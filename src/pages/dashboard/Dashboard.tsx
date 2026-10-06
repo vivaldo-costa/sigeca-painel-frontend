@@ -9,7 +9,8 @@ import { FiltrosBar } from '@/components/dashboard/FiltrosBar'
 import { KpiRow } from '@/components/dashboard/KpiRow'
 import { EvolucaoEscuteirosCard } from '@/components/dashboard/EvolucaoEscuteirosCard'
 import { SeccoesGeneroCard } from '@/components/dashboard/SeccoesGeneroCard'
-import { TopDiocesesCard } from '@/components/dashboard/TopDiocesesCard'
+import { DiocesesCard } from '@/components/dashboard/DiocesesCard'
+import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
 import { UltimasAtividadesCard } from '@/components/dashboard/UltimasAtividadesCard'
 import { UltimosRegistosCard } from '@/components/dashboard/UltimosRegistosCard'
 import { AcoesRapidasCard } from '@/components/dashboard/AcoesRapidasCard'
@@ -66,14 +67,34 @@ export function DashboardPage() {
 
       {data && (
         <>
+          <div className="flex justify-end">
+            <ExportarBotoes
+              tamanho="sm"
+              nomeFicheiro="indicadores-dashboard"
+              titulo="Indicadores do Dashboard"
+              colunas={[
+                { titulo: 'Indicador', valor: (l: { indicador: string; valor: number; crescimento: number | null }) => l.indicador },
+                { titulo: 'Valor', valor: (l: { indicador: string; valor: number; crescimento: number | null }) => l.valor },
+                { titulo: 'Crescimento mensal', valor: (l: { indicador: string; valor: number; crescimento: number | null }) => (l.crescimento === null ? '—' : `${l.crescimento}%`) },
+              ]}
+              linhas={[
+                { indicador: 'Total de Escuteiros', valor: data.contadores.total_utilizadores, crescimento: data.crescimento.escuteiros },
+                { indicador: 'Escuteiros activos', valor: data.contadores.utilizadores_ativos, crescimento: null },
+                { indicador: 'Agrupamentos', valor: data.contadores.total_agrupamentos, crescimento: data.crescimento.agrupamentos },
+                { indicador: 'Actividades', valor: data.contadores.total_eventos, crescimento: data.crescimento.actividades },
+                { indicador: 'Formações', valor: data.contadores.total_formacoes, crescimento: data.crescimento.formacoes },
+                { indicador: 'Votações', valor: data.contadores.total_votacoes, crescimento: null },
+                { indicador: 'Produtos', valor: data.contadores.total_produtos, crescimento: null },
+                { indicador: 'Vendas (Kz)', valor: data.contadores.total_vendas, crescimento: data.crescimento.vendas },
+              ]}
+            />
+          </div>
+
           <KpiRow contadores={data.contadores} crescimento={data.crescimento} />
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-              <EvolucaoEscuteirosCard pontos={data.evolucao_escuteiros} />
-            </div>
-            <TopDiocesesCard dioceses={data.dioceses} />
-          </div>
+          <EvolucaoEscuteirosCard pontos={data.evolucao_escuteiros} />
+
+          <DiocesesCard dioceses={data.dioceses} />
 
           <SeccoesGeneroCard
             seccoes={data.seccoes}

@@ -6,7 +6,7 @@ import { dioceseHooks, agrupamentoHooks } from '@/hooks/useEstrutura'
 import { useUtilizadores } from '@/hooks/useUtilizadores'
 import { getApiErrorMessage } from '@/lib/api'
 import { Button } from '@/components/ui/Button'
-import { Campo, TextField, SelectField } from '@/components/crud/FormShell'
+import { Campo, NumeroField, SelectField } from '@/components/crud/FormShell'
 import { notificar } from '@/lib/notificar'
 
 interface Props { onClose: () => void }
@@ -136,10 +136,10 @@ export function ModalSubmeterRegularizacao({ onClose }: Props) {
           )}
 
           <Campo label={`Valor total pago (Kz)${!valorEditadoManualmente && valorPorMembro > 0 ? ' — sugerido automaticamente' : ''}`}>
-            <TextField
-              type="number" step="0.01"
+            <NumeroField
+              decimal
               value={valorEditadoManualmente ? valorTotal : (valorSugerido || '')}
-              onChange={(e) => { setValorEditadoManualmente(true); setValorTotal(e.target.value) }}
+              onValor={(v) => { setValorEditadoManualmente(true); setValorTotal(v) }}
             />
           </Campo>
 

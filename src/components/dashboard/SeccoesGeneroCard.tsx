@@ -1,4 +1,5 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Pie, PieChart } from 'recharts'
+import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import type { SeccaoDist, ParSeccao } from '@/types/dashboard'
 
@@ -48,7 +49,12 @@ export function SeccoesGeneroCard({ seccoes, seccoesPar, paresSeccao, genero }: 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <Card className="lg:col-span-2">
-        <CardHeader><h3 className="text-[13.5px] font-semibold text-text">Distribuição por Secção</h3></CardHeader>
+        <CardHeader className="flex items-center justify-between gap-2">
+          <h3 className="text-[13.5px] font-semibold text-text">Distribuição por Secção</h3>
+          <ExportarBotoes tamanho="sm" nomeFicheiro="distribuicao-por-seccao" titulo="Distribuição de Escuteiros por Secção"
+            colunas={[{ titulo: 'Secção', valor: (d: { nome: string; total: number }) => d.nome }, { titulo: 'Total', valor: (d: { nome: string; total: number }) => d.total }]}
+            linhas={dados} />
+        </CardHeader>
         <CardBody className="h-[280px] p-3">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={dados} layout="vertical" margin={{ left: 8, right: 16 }}>
@@ -74,7 +80,16 @@ export function SeccoesGeneroCard({ seccoes, seccoesPar, paresSeccao, genero }: 
       </Card>
 
       <Card>
-        <CardHeader><h3 className="text-[13.5px] font-semibold text-text">Género</h3></CardHeader>
+        <CardHeader className="flex items-center justify-between gap-2">
+          <h3 className="text-[13.5px] font-semibold text-text">Género</h3>
+          <ExportarBotoes tamanho="sm" nomeFicheiro="distribuicao-por-genero" titulo="Distribuição de Escuteiros por Género"
+            colunas={[
+              { titulo: 'Género', valor: (d: { nome: string; valor: number }) => d.nome },
+              { titulo: 'Total', valor: (d: { nome: string; valor: number }) => d.valor },
+              { titulo: '%', valor: (d: { nome: string; valor: number }) => (totalGenero ? `${((d.valor / totalGenero) * 100).toFixed(1)}%` : '0%') },
+            ]}
+            linhas={dadosGenero} />
+        </CardHeader>
         <CardBody className="flex h-[280px] flex-col items-center justify-center p-3">
           <ResponsiveContainer width="100%" height={180}>
             <PieChart>

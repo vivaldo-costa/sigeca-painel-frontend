@@ -53,7 +53,7 @@ export function UtilizadorFicha() {
       <div className="mb-5 flex gap-1 border-b border-border">
         {([
           ['dados', 'Dados Pessoais'],
-          ['historico', 'Histórico'],
+          ['historico', 'Percurso / Histórico'],
           ['transferir', 'Transferir'],
         ] as [Aba, string][]).map(([valor, label]) => (
           <button
@@ -70,7 +70,7 @@ export function UtilizadorFicha() {
       </div>
 
       {aba === 'dados' && <AbaDados utilizador={utilizador} />}
-      {aba === 'historico' && <AbaHistorico utilizadorId={utilizador.id} />}
+      {aba === 'historico' && <AbaHistorico utilizadorId={utilizador.id} seccaoActualId={utilizador.seccao_id} cargoActual={utilizador.cargo_funcao} />}
       {aba === 'transferir' && <AbaTransferir utilizador={utilizador} />}
     </div>
   )

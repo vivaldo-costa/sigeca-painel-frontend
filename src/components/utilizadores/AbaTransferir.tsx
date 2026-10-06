@@ -36,6 +36,7 @@ export function AbaTransferir({ utilizador }: { utilizador: UtilizadorListagem }
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!agrupamentoDestino) return notificar.erro('Selecciona o agrupamento de destino.')
+    if (!documento) return notificar.erro('Anexa a Guia de Marcha ou a Declaração de Transferência.')
     try {
       await solicitar.mutateAsync({
         escuteiro_id: utilizador.id,
@@ -96,13 +97,17 @@ export function AbaTransferir({ utilizador }: { utilizador: UtilizadorListagem }
           </Campo>
 
           <div>
-            <label className="mb-1.5 block text-[13px] font-medium text-muted">Documento de suporte (opcional)</label>
+            <label className="mb-1.5 block text-[13px] font-medium text-muted">
+              Anexar Guia de Marcha ou Declaração de Transferência <span className="text-badge-red-text">*</span>
+            </label>
             <input
               type="file"
+              required
               accept=".pdf,.jpg,.jpeg,.png"
               onChange={(e) => setDocumento(e.target.files?.[0] ?? null)}
               className="block w-full text-[13px] text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-bg file:px-3 file:py-2 file:text-[12.5px] file:font-medium file:text-text"
             />
+            <p className="mt-1 text-[11.5px] text-subtle">Obrigatório. PDF ou imagem (JPG/PNG).</p>
           </div>
 
           <Button type="submit" loading={solicitar.isPending}>
