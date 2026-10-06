@@ -44,3 +44,28 @@ export interface ItemCarrinhoPos {
 }
 
 export const METODOS_PAGAMENTO = ['Dinheiro', 'Transferência', 'TPA/Multicaixa', 'Outro']
+
+export interface ItemVendaListagem {
+  id: number
+  pedido_id: number
+  pedido_em: string
+  status: string
+  origem: 'pos' | 'portal'
+  levantado_em: string | null
+  produto_id: number
+  produto_nome: string
+  sku: string | null
+  tamanho: string | null
+  cor: string | null
+  quantidade: number
+  preco_unitario: number
+  subtotal: number
+  utilizador_id: number
+  cliente_nome: string
+  codigo_associado: string
+  contacto: string | null
+  diocese_nome: string | null
+  agrupamento_nome: string | null
+  ab_agrupamento: string | null
+  seccao_nome: string | null
+}

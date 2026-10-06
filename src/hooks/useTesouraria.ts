@@ -5,10 +5,15 @@ import type {
   RelatorioSeccaoTesouraria, RubricaTesouraria, SaldoTesouraria,
 } from '@/types/tesouraria'
 
-interface Conta { nivel: NivelTesouraria; estruturaId: number | null }
+interface Conta { nivel: NivelTesouraria; estruturaId: number | null; dataInicio?: string; dataFim?: string }
 
-function queryParams({ nivel, estruturaId }: Conta) {
-  return estruturaId === null ? { nivel } : { nivel, estruturaId }
+function queryParams({ nivel, estruturaId, dataInicio, dataFim }: Conta) {
+  return {
+    nivel,
+    ...(estruturaId === null ? {} : { estruturaId }),
+    ...(dataInicio ? { dataInicio } : {}),
+    ...(dataFim ? { dataFim } : {}),
+  }
 }
 
 export function useRubricasTesouraria() {
@@ -111,5 +116,7 @@ export function exportarMapaTesourariaUrl(conta: Conta, estruturaNome?: string) 
   const params = new URLSearchParams({ nivel: conta.nivel })
   if (conta.estruturaId !== null) params.set('estruturaId', String(conta.estruturaId))
   if (estruturaNome) params.set('estruturaNome', estruturaNome)
+  if (conta.dataInicio) params.set('dataInicio', conta.dataInicio)
+  if (conta.dataFim) params.set('dataFim', conta.dataFim)
   return `/tesouraria/exportar?${params.toString()}`
 }

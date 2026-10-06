@@ -10,18 +10,10 @@ import { ModalRetorno } from '@/components/vendas/ModalRetorno'
 import { uploadUrl } from '@/lib/uploads'
 import { getApiErrorMessage } from '@/lib/api'
 import { notificar } from '@/lib/notificar'
-import type { FiltrosPedidos, StatusPedido, StatusLinha, PedidoPainel, EstadoStockPedido } from '@/types/pedidoPainel'
+import { STATUS_LABEL, type FiltrosPedidos, type StatusPedido, type StatusLinha, type PedidoPainel, type EstadoStockPedido } from '@/types/pedidoPainel'
 
 const ESTADOS_PEDIDO: StatusPedido[] = ['pendente', 'aguardando_pagamento', 'pago', 'pronto', 'enviado', 'entregue', 'cancelado']
-const ROTULO_PEDIDO: Record<StatusPedido, string> = {
-  pendente: 'Pendente',
-  aguardando_pagamento: 'A aguardar pagamento',
-  pago: 'Pago',
-  pronto: 'Pronta p/ levantar',
-  enviado: 'Enviada',
-  entregue: 'Entregue/Levantada',
-  cancelado: 'Cancelada',
-}
+const ROTULO_PEDIDO = STATUS_LABEL
 const CORES_PEDIDO: Record<StatusPedido, string> = {
   pendente: 'bg-badge-orange-bg text-badge-orange-text',
   aguardando_pagamento: 'bg-badge-orange-bg text-badge-orange-text',
@@ -59,7 +51,27 @@ export function EncomendasLista() {
   const { editar: podeEditar } = usePermissao('Produtos')
   const [retorno, setRetorno] = useState<number | null>(null)
 
+  // Entrega/levantamento: pede uma observação opcional (quem levantou, estado da mercadoria, …)
+  const [aEntregar, setAEntregar] = useState<PedidoPainel | null>(null)
+  const [observacaoEntrega, setObservacaoEntrega] = useState('')
+
+  async function confirmarEntrega() {
+    if (!aEntregar) return
+    try {
+      await atualizarPedido.mutateAsync({ id: aEntregar.id, status: 'entregue', observacao_entrega: observacaoEntrega.trim() || undefined })
+      notificar.sucesso(`Encomenda #${aEntregar.id}: ${ROTULO_PEDIDO.entregue}.`)
+      setAEntregar(null)
+    } catch (err) {
+      notificar.erro(getApiErrorMessage(err, 'Não foi possível mudar o estado.'))
+    }
+  }
+
   async function mudarEstado(pedido: PedidoPainel, status: StatusPedido) {
+    if (status === 'entregue') {
+      setObservacaoEntrega('')
+      setAEntregar(pedido)
+      return
+    }
     const mensagens: Partial<Record<StatusPedido, string>> = {
       cancelado: pedido.estado_stock === 'reservado'
         ? 'Cancelar a encomenda? A reserva de stock é libertada (fica de novo disponível). Esta acção não se pode desfazer.'
@@ -167,6 +179,9 @@ export function EncomendasLista() {
                     {pedido.codigo_associado} · {new Date(pedido.pedido_em).toLocaleString('pt-PT')}
                     {pedido.levantado_em && ` · levantada ${new Date(pedido.levantado_em).toLocaleString('pt-PT')}`}
                   </p>
+                  {pedido.observacao_entrega && (
+                    <p className="mt-0.5 text-[11.5px] text-muted">Obs. da entrega: <span className="text-text">{pedido.observacao_entrega}</span></p>
+                  )}
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${STOCK_BADGE[pedido.estado_stock]?.[1] ?? ''}`}>
@@ -255,6 +270,23 @@ export function EncomendasLista() {
         })}
       </div>
 
+      {aEntregar && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setAEntregar(null)}>
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="mb-1 font-bold text-text">Encomenda #{aEntregar.id} — confirmar entrega/levantamento</h3>
+            <p className="mb-3 text-[12.5px] text-muted">
+              {aEntregar.estado_stock === 'reservado' ? 'A reserva passa a saída real do stock físico. ' : ''}Podes deixar uma observação (quem levantou, estado da mercadoria, …).
+            </p>
+            <textarea value={observacaoEntrega} onChange={(e) => setObservacaoEntrega(e.target.value)} rows={3} maxLength={2000} autoFocus
+              placeholder="Observação no acto da entrega (opcional)"
+              className="mb-3 w-full resize-none rounded-lg border border-border px-3 py-2 text-[13px] outline-none focus:border-[#111827]" />
+            <div className="flex gap-2">
+              <button onClick={() => setAEntregar(null)} className="flex-1 rounded-lg border border-border py-2 text-[13px] font-medium text-text hover:bg-bg">Cancelar</button>
+              <button onClick={confirmarEntrega} disabled={atualizarPedido.isPending} className="flex-1 rounded-lg bg-[#111827] py-2 text-[13px] font-semibold text-white disabled:opacity-50">Confirmar entrega</button>
+            </div>
+          </div>
+        </div>
+      )}
       {retorno !== null && <ModalRetorno pedidoId={retorno} onClose={() => setRetorno(null)} />}
     </div>
   )

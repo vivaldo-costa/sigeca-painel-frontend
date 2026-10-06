@@ -49,6 +49,8 @@ export function UtilizadoresLista() {
   const selecao = useSelecaoMultipla(idsDaPagina, data?.paginacao.total ?? 0)
 
   const alterarEstadoMassa = useAlterarEstadoMassa()
+  const [pedirMotivo, setPedirMotivo] = useState(false)
+  const [motivoInactivacao, setMotivoInactivacao] = useState('')
   const eliminarMassa = useEliminarMassa()
   const exportarMassa = useExportarMassa()
   const confirmar = useConfirmar()
@@ -71,10 +73,17 @@ export function UtilizadoresLista() {
     }
   }
 
-  async function handleDesativarMassa() {
+  function handleDesativarMassa() {
+    setMotivoInactivacao('')
+    setPedirMotivo(true)
+  }
+
+  async function confirmarDesativarMassa() {
+    if (!motivoInactivacao.trim()) { notificar.aviso('Indica o motivo da inactivação.'); return }
     try {
-      await alterarEstadoMassa.mutateAsync({ acao: 'desativar', ...construirAlvo() })
+      await alterarEstadoMassa.mutateAsync({ acao: 'desativar', motivo: motivoInactivacao.trim(), ...construirAlvo() })
       notificar.sucesso(`${selecao.totalSelecionado} escuteiro(s) desactivado(s).`)
+      setPedirMotivo(false)
       selecao.limpar()
     } catch (err) {
       notificar.erro(getApiErrorMessage(err, 'Não foi possível desactivar os escuteiros seleccionados.'))
@@ -304,6 +313,23 @@ export function UtilizadoresLista() {
       <div className="mt-4">
         <PaginacaoServidor paginacao={data?.paginacao} onMudarPagina={(pagina) => setFiltros((f) => ({ ...f, pagina }))} />
       </div>
+
+      {pedirMotivo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setPedirMotivo(false)}>
+          <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="mb-1 font-bold text-text">Inactivar {selecao.totalSelecionado} escuteiro(s)</h3>
+            <p className="mb-3 text-[12.5px] text-muted">O motivo fica registado na ficha de cada escuteiro.</p>
+            <textarea value={motivoInactivacao} onChange={(e) => setMotivoInactivacao(e.target.value)} maxLength={255} rows={3} autoFocus
+              placeholder="Motivo da inactivação…"
+              className="mb-3 w-full resize-none rounded-lg border border-border px-3 py-2 text-[13px] outline-none focus:border-[#111827]" />
+            <div className="flex gap-2">
+              <button onClick={() => setPedirMotivo(false)} className="flex-1 rounded-lg border border-border py-2 text-[13px] font-medium text-text hover:bg-bg">Cancelar</button>
+              <button onClick={confirmarDesativarMassa} disabled={!motivoInactivacao.trim() || alterarEstadoMassa.isPending}
+                className="flex-1 rounded-lg bg-badge-red-text py-2 text-[13px] font-semibold text-white disabled:opacity-50">Inactivar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

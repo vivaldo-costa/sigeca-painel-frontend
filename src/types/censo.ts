@@ -16,6 +16,7 @@ export interface CensoRespostaResumo {
   agrupamento_id: number
   agrupamento_nome: string
   ab_agrupamento: string
+  diocese_nome?: string | null
   resposta_id: number | null
   num_dirigentes: number | null
   num_candidatos: number | null

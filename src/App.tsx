@@ -76,6 +76,7 @@ import { DashboardFormacaoDirigentePage } from '@/pages/dashboardFormacaoDirigen
 import { VendaPosPage } from '@/pages/vendas/VendaPosPage'
 import { VendasLista } from '@/pages/vendas/VendasLista'
 import { RetornosLista } from '@/pages/vendas/RetornosLista'
+import { VendasItensPage } from '@/pages/vendas/VendasItensPage'
 import { StockInventarioPage } from '@/pages/stock/StockInventarioPage'
 import { StockMovimentosPage } from '@/pages/stock/StockMovimentosPage'
 
@@ -188,6 +189,7 @@ export default function App() {
         <Route path="/vendas" element={<VendasLista />} />
         <Route path="/vendas/pos" element={<VendaPosPage />} />
         <Route path="/vendas/retornos" element={<RetornosLista />} />
+        <Route path="/vendas/artigos" element={<VendasItensPage />} />
         <Route path="/stock" element={<StockInventarioPage />} />
         <Route path="/stock/movimentos" element={<StockMovimentosPage />} />
         <Route path="/stock/ajustes" element={<StockMovimentosPage key="ajustes" modo="ajustes" />} />

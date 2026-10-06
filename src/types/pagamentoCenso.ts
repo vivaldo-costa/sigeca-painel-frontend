@@ -27,6 +27,9 @@ export interface MembroPagamentoCenso {
   utilizador_id: number
   nome: string
   codigo_associado: string
+  seccao_nome?: string | null
+  agrupamento_nome?: string | null
+  ab_agrupamento?: string | null
 }
 
 export interface AgrupamentoPagamentoCenso {

@@ -8,7 +8,7 @@ type AlvoMassa = { ids: number[]; filtros?: never } | { ids?: never; filtros: Pa
 export function useAlterarEstadoMassa() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: AlvoMassa & { acao: 'activar' | 'desativar' | 'alterar_estado'; novoEstado?: string }) => {
+    mutationFn: async (payload: AlvoMassa & { acao: 'activar' | 'desativar' | 'alterar_estado'; novoEstado?: string; motivo?: string }) => {
       const { data } = await api.post<{ dados: { afectados: number }; mensagem: string }>('/utilizadores/massa/estado', payload)
       return data
     },

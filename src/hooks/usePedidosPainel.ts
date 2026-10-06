@@ -15,8 +15,8 @@ export function usePedidosPainel(filtros: FiltrosPedidos) {
 export function useAtualizarStatusPedido() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ id, status }: { id: number; status: StatusPedido }) => {
-      const { data } = await api.patch(`/pedidos/${id}/status`, { status })
+    mutationFn: async ({ id, status, observacao_entrega }: { id: number; status: StatusPedido; observacao_entrega?: string }) => {
+      const { data } = await api.patch(`/pedidos/${id}/status`, { status, observacao_entrega })
       return data
     },
     onSuccess: () => {

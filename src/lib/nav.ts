@@ -31,10 +31,10 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: 'Gestão Institucional',
     groups: [
-      { label: 'Dioceses', icon: Church, items: [{ label: 'Consultar Diocese', to: '/dioceses' }, { label: 'Nova Diocese', to: '/dioceses/novo' }] },
-      { label: 'Vigararias / Zonas', icon: MapPinned, items: [{ label: 'Consultar Vigararia', to: '/vigararias' }, { label: 'Nova Vigararia', to: '/vigararias/novo' }] },
-      { label: 'Paróquias', icon: Landmark, items: [{ label: 'Consultar Paróquia', to: '/paroquias' }, { label: 'Nova Paróquia', to: '/paroquias/novo' }] },
-      { label: 'Agrupamentos', icon: UsersRound, items: [{ label: 'Consultar Agrupamento', to: '/agrupamentos' }, { label: 'Novo Agrupamento', to: '/agrupamentos/novo' }] },
+      { label: 'Dioceses', icon: Church, items: [{ label: 'Nova Diocese', to: '/dioceses/novo' }, { label: 'Consultar Diocese', to: '/dioceses' }] },
+      { label: 'Vigararias / Zonas', icon: MapPinned, items: [{ label: 'Nova Vigararia', to: '/vigararias/novo' }, { label: 'Consultar Vigararia', to: '/vigararias' }] },
+      { label: 'Paróquias', icon: Landmark, items: [{ label: 'Nova Paróquia', to: '/paroquias/novo' }, { label: 'Consultar Paróquia', to: '/paroquias' }] },
+      { label: 'Agrupamentos', icon: UsersRound, items: [{ label: 'Novo Agrupamento', to: '/agrupamentos/novo' }, { label: 'Consultar Agrupamento', to: '/agrupamentos' }] },
       { label: 'Censo', icon: ClipboardList, to: '/censo' },
     ],
   },
@@ -44,13 +44,13 @@ export const NAV_SECTIONS: NavSection[] = [
       {
         label: 'Escuteiros', icon: UserRound,
         items: [
-          { label: 'Consultar Escuteiro', to: '/utilizadores' },
           { label: 'Novo Escuteiro', to: '/utilizadores/novo' },
+          { label: 'Consultar Escuteiro', to: '/utilizadores' },
           { label: 'Transferências', to: '/utilizadores/transferencias' },
           { label: 'Modelo de Cartão', to: '/utilizadores/modelo-cartao' },
         ],
       },
-      { label: 'Secções', icon: Layers, items: [{ label: 'Consultar Secção', to: '/seccoes' }, { label: 'Nova Secção', to: '/seccoes/novo' }] },
+      { label: 'Secções', icon: Layers, items: [{ label: 'Nova Secção', to: '/seccoes/novo' }, { label: 'Consultar Secção', to: '/seccoes' }] },
       { label: 'Denúncias', icon: Flag, to: '/denuncias' },
     ],
   },
@@ -84,6 +84,7 @@ export const NAV_SECTIONS: NavSection[] = [
         items: [
           { label: 'Nova Venda (POS)', to: '/vendas/pos' },
           { label: 'Consultar Vendas', to: '/vendas' },
+          { label: 'Vendas por Artigo', to: '/vendas/artigos' },
           { label: 'Encomendas', to: '/produtos/encomendas' },
           { label: 'Devoluções / Trocas', to: '/vendas/retornos' },
         ],

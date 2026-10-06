@@ -138,7 +138,7 @@ export function VendaPosPage() {
                     className="flex flex-col items-start text-left disabled:cursor-default"
                   >
                     {p.imagem && (
-                      <img src={uploadUrl('produtos', p.imagem) ?? undefined} alt={p.nome} className="mb-2 h-20 w-full rounded-lg object-cover" />
+                      <img src={uploadUrl('produtos', p.imagem) ?? undefined} alt={p.nome} className="mb-2 h-20 w-full rounded-lg bg-white object-contain" />
                     )}
                     <p className="line-clamp-2 text-[12.5px] font-medium text-text">{p.nome}</p>
                     <p className="mt-1 text-[13px] font-bold text-text">{Number(p.variantes[0]?.preco ?? 0).toLocaleString('pt-PT')} Kz</p>

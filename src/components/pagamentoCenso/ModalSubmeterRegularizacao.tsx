@@ -8,6 +8,7 @@ import { getApiErrorMessage } from '@/lib/api'
 import { Button } from '@/components/ui/Button'
 import { Campo, NumeroField, SelectField } from '@/components/crud/FormShell'
 import { notificar } from '@/lib/notificar'
+import { formatarAgrupamento } from '@/lib/formatadores'
 
 interface Props { onClose: () => void }
 
@@ -23,15 +24,19 @@ export function ModalSubmeterRegularizacao({ onClose }: Props) {
   const { data: periodos } = useCensoPeriodos()
   const { data: dioceses } = dioceseHooks.useList()
   const { data: agrupamentos } = agrupamentoHooks.useList()
+  // Por número do agrupamento (há agrupamentos com o mesmo nome)
   const agrupamentosDaDiocese = useMemo(
-    () => (agrupamentos ?? []).filter((a) => dioceseId && a.diocese_id === dioceseId),
+    () => (agrupamentos ?? [])
+      .filter((a) => dioceseId && a.diocese_id === dioceseId)
+      .sort((x, y) => (Number(x.ab_agrupamento) || 0) - (Number(y.ab_agrupamento) || 0) || x.nome.localeCompare(y.nome)),
     [agrupamentos, dioceseId],
   )
-  const { data: membrosDisponiveis } = useUtilizadores({
+  const { data: membrosDisponiveis, isFetching: aCarregarMembros } = useUtilizadores({
     agrupamentoIds: agrupamentosIds.length > 0 ? agrupamentosIds.join(',') : undefined,
-    porPagina: 200,
+    porPagina: 5000,
     estado: 'ACTIVO',
   })
+  const membros = membrosDisponiveis?.dados ?? []
   const submeter = useSubmeterPagamentoCenso()
 
   const periodoSelecionado = periodos?.find((p) => p.id === periodoCensoId)
@@ -43,8 +48,20 @@ export function ModalSubmeterRegularizacao({ onClose }: Props) {
     setMembrosSelecionados([])
   }
 
+  function marcarTodosAgrupamentos() {
+    const todos = agrupamentosDaDiocese.map((a) => a.id)
+    setAgrupamentosIds((prev) => (prev.length === todos.length ? [] : todos))
+    setMembrosSelecionados([])
+  }
+
+  function marcarTodosMembros() {
+    setMembrosSelecionados((prev) => (prev.length === membros.length ? [] : membros.map((m) => m.id)))
+    setValorEditadoManualmente(false)
+  }
+
   function alternarMembro(id: number) {
     setMembrosSelecionados((prev) => (prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]))
+    setValorEditadoManualmente(false)
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -106,13 +123,17 @@ export function ModalSubmeterRegularizacao({ onClose }: Props) {
 
           {dioceseId && (
             <Campo label={`Agrupamentos a regularizar (${agrupamentosIds.length} seleccionado${agrupamentosIds.length !== 1 ? 's' : ''})`}>
+              {agrupamentosDaDiocese.length > 0 && (
+                <button type="button" onClick={marcarTodosAgrupamentos} className="mb-1 text-[12px] font-semibold text-badge-blue-text hover:underline">
+                  {agrupamentosIds.length === agrupamentosDaDiocese.length ? 'Desmarcar todos' : 'Marcar todos'}
+                </button>
+              )}
               <div className="max-h-36 space-y-1 overflow-y-auto rounded-lg border border-border p-2">
                 {agrupamentosDaDiocese.length === 0 && <p className="p-2 text-[12.5px] text-subtle">Nenhum agrupamento encontrado nesta diocese.</p>}
                 {agrupamentosDaDiocese.map((a) => (
                   <label key={a.id} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-[12.5px] hover:bg-bg">
                     <input type="checkbox" checked={agrupamentosIds.includes(a.id)} onChange={() => alternarAgrupamento(a.id)} className="size-3.5" />
-                    <span className="flex-1">{a.nome}</span>
-                    {a.ab_agrupamento && <span className="font-mono text-[11px] text-subtle">{a.ab_agrupamento}</span>}
+                    <span className="flex-1">{formatarAgrupamento(a)}</span>
                   </label>
                 ))}
               </div>
@@ -120,19 +141,35 @@ export function ModalSubmeterRegularizacao({ onClose }: Props) {
           )}
 
           {agrupamentosIds.length > 0 && (
-            <Campo label={`Membros a regularizar (${membrosSelecionados.length} seleccionado${membrosSelecionados.length !== 1 ? 's' : ''})`}>
-              <div className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-border p-2">
-                {membrosDisponiveis?.dados.length === 0 && <p className="p-2 text-[12.5px] text-subtle">Nenhum membro activo nestes agrupamentos.</p>}
-                {membrosDisponiveis?.dados.map((m) => (
+            <Campo label={`Membros a regularizar (${membrosSelecionados.length} de ${membros.length} seleccionado${membrosSelecionados.length !== 1 ? 's' : ''})`}>
+              {membros.length > 0 && (
+                <button type="button" onClick={marcarTodosMembros} className="mb-1 text-[12px] font-semibold text-badge-blue-text hover:underline">
+                  {membrosSelecionados.length === membros.length ? 'Desmarcar todos' : `Marcar todos (${membros.length})`}
+                </button>
+              )}
+              <div className="max-h-56 space-y-1 overflow-y-auto rounded-lg border border-border p-2">
+                {aCarregarMembros && membros.length === 0 && <p className="flex items-center gap-2 p-2 text-[12.5px] text-subtle"><Loader2 className="size-3.5 animate-spin" /> A carregar membros…</p>}
+                {!aCarregarMembros && membros.length === 0 && <p className="p-2 text-[12.5px] text-subtle">Nenhum membro activo nestes agrupamentos.</p>}
+                {membros.map((m) => (
                   <label key={m.id} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-[12.5px] hover:bg-bg">
                     <input type="checkbox" checked={membrosSelecionados.includes(m.id)} onChange={() => alternarMembro(m.id)} className="size-3.5" />
                     <UserRound className="size-3.5 text-subtle" />
-                    <span className="flex-1">{m.nome}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate">{m.nome}</span>
+                      <span className="block text-[11px] text-subtle">{[m.seccao_nome, m.ab_agrupamento].filter(Boolean).join(' · ') || '—'}</span>
+                    </span>
                     <span className="font-mono text-[11px] text-subtle">{m.codigo_associado}</span>
                   </label>
                 ))}
               </div>
             </Campo>
+          )}
+
+          {valorPorMembro > 0 && membrosSelecionados.length > 0 && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[12.5px] text-amber-900">
+              <span className="font-semibold">{membrosSelecionados.length}</span> membro(s) × {valorPorMembro.toLocaleString('pt-PT', { minimumFractionDigits: 2 })} Kz ={' '}
+              <span className="font-bold">{valorSugerido.toLocaleString('pt-PT', { minimumFractionDigits: 2 })} Kz</span> a pagar
+            </div>
           )}
 
           <Campo label={`Valor total pago (Kz)${!valorEditadoManualmente && valorPorMembro > 0 ? ' — sugerido automaticamente' : ''}`}>

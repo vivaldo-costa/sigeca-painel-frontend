@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { X, Loader2, ImagePlus } from 'lucide-react'
+import { X, Loader2, ImagePlus, Trash2 } from 'lucide-react'
 import { useCriarVotacao, useAtualizarVotacao } from '@/hooks/useVotacoes'
 import { getApiErrorMessage } from '@/lib/api'
 import { uploadUrl } from '@/lib/uploads'
@@ -17,6 +17,8 @@ function paraForm(v: VotacaoPainel | null): VotacaoFormPayload {
     data_inicio: v?.data_inicio ? v.data_inicio.slice(0, 10) : '',
     data_fim: v?.data_fim ? v.data_fim.slice(0, 10) : '',
     ativo: v ? !!v.ativo : true,
+    imagens_manter: v?.imagens ?? [],
+    imagens_novas: [],
   }
 }
 
@@ -70,6 +72,30 @@ export function ModalVotacaoForm({ votacao, onClose }: Props) {
               <input type="file" accept="image/*" className="hidden" onChange={onImagemChange} />
             </label>
           </div>
+
+          <Campo label={`Mais fotos (${(form.imagens_manter?.length ?? 0) + (form.imagens_novas?.length ?? 0)})`}>
+            <div className="flex flex-wrap gap-2">
+              {(form.imagens_manter ?? []).map((f) => (
+                <div key={f} className="relative size-16 overflow-hidden rounded-lg border border-border">
+                  <img src={uploadUrl('votacoes', f)!} className="size-full object-cover" alt="" />
+                  <button type="button" title="Remover" onClick={() => setForm((x) => ({ ...x, imagens_manter: x.imagens_manter?.filter((i) => i !== f) }))}
+                    className="absolute right-0.5 top-0.5 grid size-5 place-items-center rounded-full bg-white/90 text-badge-red-text"><Trash2 className="size-3" /></button>
+                </div>
+              ))}
+              {(form.imagens_novas ?? []).map((f, i) => (
+                <div key={`${f.name}-${i}`} className="relative size-16 overflow-hidden rounded-lg border border-dashed border-border">
+                  <img src={URL.createObjectURL(f)} className="size-full object-cover" alt="" />
+                  <button type="button" title="Remover" onClick={() => setForm((x) => ({ ...x, imagens_novas: x.imagens_novas?.filter((_, j) => j !== i) }))}
+                    className="absolute right-0.5 top-0.5 grid size-5 place-items-center rounded-full bg-white/90 text-badge-red-text"><Trash2 className="size-3" /></button>
+                </div>
+              ))}
+              <label className="grid size-16 cursor-pointer place-items-center rounded-lg border border-dashed border-border text-subtle hover:bg-bg" title="Adicionar fotos">
+                <ImagePlus className="size-5" />
+                <input type="file" accept="image/*" multiple className="hidden"
+                  onChange={(e) => { const novos = Array.from(e.target.files ?? []); e.target.value = ''; setForm((x) => ({ ...x, imagens_novas: [...(x.imagens_novas ?? []), ...novos].slice(0, 10) })) }} />
+              </label>
+            </div>
+          </Campo>
 
           <Campo label="Título"><TextField required value={form.titulo} onChange={(e) => setForm((f) => ({ ...f, titulo: e.target.value }))} /></Campo>
           <Campo label="Descrição">

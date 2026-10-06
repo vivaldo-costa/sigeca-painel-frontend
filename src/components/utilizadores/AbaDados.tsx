@@ -23,6 +23,7 @@ function montarForm(utilizador: UtilizadorListagem) {
     email: utilizador.email ?? '',
     telefone: utilizador.telefone ?? '',
     estado: utilizador.estado,
+    motivo_inativacao: '',
     data_nascimento: utilizador.data_nascimento ?? '',
     unidade_seccao_id: utilizador.unidade_seccao_id,
     ...utilizadorParaCamposAdicionais(utilizador),
@@ -40,8 +41,15 @@ export function AbaDados({ utilizador }: { utilizador: UtilizadorListagem }) {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
+    const vaiInactivar = form.estado === 'INATIVO' && utilizador.estado !== 'INATIVO'
+    if (vaiInactivar && !form.motivo_inativacao.trim()) {
+      notificar.aviso('Indica o motivo da inactivação.')
+      return
+    }
+    const { motivo_inativacao: motivo, ...resto } = form
+    const payload = vaiInactivar ? { ...resto, motivo_inativacao: motivo.trim() } : resto
     try {
-      await actualizar.mutateAsync({ id: utilizador.id, payload: limparDatasOpcionais(form) })
+      await actualizar.mutateAsync({ id: utilizador.id, payload: limparDatasOpcionais(payload) })
       notificar.sucesso('Dados actualizados.')
     } catch (err) {
       notificar.erro(getApiErrorMessage(err, 'Não foi possível guardar as alterações.'))
@@ -68,6 +76,17 @@ export function AbaDados({ utilizador }: { utilizador: UtilizadorListagem }) {
             </SelectField>
           </Campo>
         </Linha2>
+        {form.estado === 'INATIVO' && utilizador.estado !== 'INATIVO' && (
+          <Campo label="Motivo da inactivação (obrigatório)">
+            <TextField required maxLength={255} value={form.motivo_inativacao} placeholder="Ex.: deixou de frequentar o agrupamento"
+              onChange={(e) => setForm((f) => ({ ...f, motivo_inativacao: e.target.value }))} />
+          </Campo>
+        )}
+        {utilizador.estado === 'INATIVO' && utilizador.motivo_inativacao && (
+          <p className="rounded-lg bg-bg px-3 py-2 text-[12.5px] text-muted">
+            Inactivado{utilizador.inativado_em ? ` em ${new Date(utilizador.inativado_em).toLocaleDateString('pt-PT')}` : ''} — motivo: <span className="font-medium text-text">{utilizador.motivo_inativacao}</span>
+          </p>
+        )}
         <Linha2>
           <Campo label="E-mail">
             <TextField type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />

@@ -14,6 +14,8 @@ export interface UtilizadorListagem {
   telefone: string | null
   foto: string | null
   estado: EstadoUtilizador
+  motivo_inativacao?: string | null
+  inativado_em?: string | null
   perfil_id: number
   perfil_nome: string
   diocese_id: number | null

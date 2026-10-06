@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronLeft, Plus, Loader2, Download } from 'lucide-react'
-import { usePagamentosCenso, useValidarPagamentoCenso, useRejeitarPagamentoCenso } from '@/hooks/usePagamentoCenso'
+import { ChevronLeft, Plus, Loader2, Download, Users } from 'lucide-react'
+import { usePagamentosCenso, usePagamentoCensoDetalhe, useValidarPagamentoCenso, useRejeitarPagamentoCenso } from '@/hooks/usePagamentoCenso'
 import { usePermissao } from '@/hooks/usePermissao'
 import { Card } from '@/components/ui/Card'
 import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
@@ -9,7 +9,7 @@ import { ModalSubmeterRegularizacao } from '@/components/pagamentoCenso/ModalSub
 import { baixarFicheiroProtegido } from '@/lib/download'
 import { getApiErrorMessage } from '@/lib/api'
 import { notificar } from '@/lib/notificar'
-import type { EstadoPagamentoCenso, PagamentoCensoPainel } from '@/types/pagamentoCenso'
+import type { EstadoPagamentoCenso, MembroPagamentoCenso, PagamentoCensoPainel } from '@/types/pagamentoCenso'
 
 const CORES_ESTADO: Record<EstadoPagamentoCenso, string> = {
   pendente: 'bg-badge-orange-bg text-badge-orange-text',
@@ -27,6 +27,7 @@ export function RegularizacaoCensoLista() {
   const [modalAberto, setModalAberto] = useState(false)
   const [aRejeitar, setARejeitar] = useState<number | null>(null)
   const [motivo, setMotivo] = useState('')
+  const [membrosAbertos, setMembrosAbertos] = useState<number | null>(null)
 
   async function confirmarRejeicao(id: number) {
     if (!motivo.trim()) return
@@ -114,6 +115,12 @@ export function RegularizacaoCensoLista() {
             </div>
 
             <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
+              <button
+                onClick={() => setMembrosAbertos(membrosAbertos === p.id ? null : p.id)}
+                className="flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-[11.5px] font-medium text-text transition hover:bg-bg"
+              >
+                <Users className="size-3" /> {membrosAbertos === p.id ? 'Esconder membros' : 'Ver membros'}
+              </button>
               {p.comprovativo_path && (
                 <button
                   onClick={() => baixarComErro(`/regularizacao-censo/${p.id}/comprovativo`, p.comprovativo_nome || 'comprovativo')}
@@ -133,6 +140,7 @@ export function RegularizacaoCensoLista() {
                 </>
               )}
             </div>
+            {membrosAbertos === p.id && <MembrosRegularizacao pagamento={p} />}
           </Card>
         ))}
       </div>
@@ -161,6 +169,60 @@ export function RegularizacaoCensoLista() {
       )}
 
       {modalAberto && <ModalSubmeterRegularizacao onClose={() => setModalAberto(false)} />}
+    </div>
+  )
+}
+
+/** Membros abrangidos por uma regularização — com Nº SIGECA, Secção e Agrupamento. */
+function MembrosRegularizacao({ pagamento }: { pagamento: PagamentoCensoPainel }) {
+  const { data, isLoading } = usePagamentoCensoDetalhe(pagamento.id)
+  const membros = data?.membros ?? []
+  return (
+    <div className="mt-3 rounded-lg border border-border">
+      <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2">
+        <p className="text-[12px] font-semibold text-text">{membros.length} membro(s)</p>
+        <ExportarBotoes
+          tamanho="sm"
+          nomeFicheiro={`regularizacao-${pagamento.id}-membros`}
+          titulo={`Regularização #${pagamento.id} — ${pagamento.diocese_nome ?? ''}`}
+          subtitulo={`${pagamento.periodo_titulo} · ${pagamento.agrupamentos_nomes ?? ''}`}
+          colunas={[
+            { titulo: 'Nome', valor: (m: MembroPagamentoCenso) => m.nome },
+            { titulo: 'Nº SIGECA', valor: (m) => m.codigo_associado },
+            { titulo: 'Secção', valor: (m) => m.seccao_nome ?? '—' },
+            { titulo: 'Agrupamento', valor: (m) => [m.ab_agrupamento, m.agrupamento_nome].filter(Boolean).join(' - ') || '—' },
+          ]}
+          linhas={membros}
+        />
+      </div>
+      {isLoading ? (
+        <div className="flex justify-center py-6"><Loader2 className="size-4 animate-spin text-subtle" /></div>
+      ) : (
+        <div className="max-h-72 overflow-auto">
+          <table className="w-full text-left text-[12px]">
+            <thead className="sticky top-0 bg-bg text-[10.5px] uppercase tracking-wide text-muted">
+              <tr>
+                <th className="px-3 py-2 font-medium">Nome</th>
+                <th className="px-3 py-2 font-medium">Nº SIGECA</th>
+                <th className="px-3 py-2 font-medium">Secção</th>
+                <th className="px-3 py-2 font-medium">Agrupamento</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {membros.map((m) => (
+                <tr key={m.id}>
+                  <td className="px-3 py-1.5 text-text">{m.nome}</td>
+                  <td className="px-3 py-1.5 font-mono text-[11px] text-muted">
+                    <Link to={`/utilizadores/${m.utilizador_id}`} className="hover:underline">{m.codigo_associado}</Link>
+                  </td>
+                  <td className="px-3 py-1.5 text-muted">{m.seccao_nome ?? '—'}</td>
+                  <td className="px-3 py-1.5 text-muted">{[m.ab_agrupamento, m.agrupamento_nome].filter(Boolean).join(' - ') || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }

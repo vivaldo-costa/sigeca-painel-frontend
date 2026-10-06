@@ -2,6 +2,7 @@ import { useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useCriarUtilizador } from '@/hooks/useUtilizadores'
 import { useOpcoesFiltro } from '@/hooks/useDashboardPainel'
+import axios from 'axios'
 import { getApiErrorMessage } from '@/lib/api'
 import { formatarAgrupamento } from '@/lib/formatadores'
 import { Campo, Linha2, TextField, SelectField } from '@/components/crud/FormShell'
@@ -107,11 +108,28 @@ export function UtilizadorNovoForm() {
       textoConfirmar: 'Sim, criar escuteiro',
     })
     if (!ok) return
+    await gravar(false)
+  }
+
+  async function gravar(confirmarDuplicado: boolean) {
     try {
-      const resposta = await criar.mutateAsync(limparDatasOpcionais(form))
+      const payload = { ...limparDatasOpcionais(form), ...(confirmarDuplicado ? { confirmar_duplicado: true } : {}) }
+      const resposta = await criar.mutateAsync(payload as UtilizadorFormPayload)
       notificar.sucesso('Escuteiro criado com sucesso.')
       navigate(`/utilizadores/${(resposta as { dados?: { id: number } }).dados?.id ?? ''}`)
     } catch (err) {
+      // O sistema avisa quando o escuteiro parece já existir (mesmo BI, ou mesmo nome + data de nascimento)
+      const detalhes = axios.isAxiosError(err) ? (err.response?.data as { detalhes?: { codigo?: string } } | undefined)?.detalhes : undefined
+      if (!confirmarDuplicado && detalhes?.codigo === 'ESCUTEIRO_DUPLICADO') {
+        const continuar = await confirmar({
+          titulo: 'Este escuteiro já existe?',
+          mensagem: `${getApiErrorMessage(err)} Queres mesmo criar um novo registo?`,
+          textoConfirmar: 'Criar mesmo assim',
+          perigoso: true,
+        })
+        if (continuar) await gravar(true)
+        return
+      }
       notificar.erro(getApiErrorMessage(err, 'Não foi possível criar o escuteiro.'))
     }
   }

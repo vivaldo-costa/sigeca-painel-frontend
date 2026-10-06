@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { formatarAgrupamento } from '@/lib/formatadores'
 import { Link } from 'react-router-dom'
 import {
   Wallet, ChevronLeft, Loader2, Download, Plus, ArrowDownCircle, ArrowUpCircle, Trash2, ChevronDown, ChevronUp,
@@ -39,6 +40,8 @@ function formatarKz(valor: number) {
 
 export function TesourariaPage() {
   const [nivel, setNivel] = useState<NivelTesouraria>('agrupamento')
+  const [dataInicio, setDataInicio] = useState('')
+  const [dataFim, setDataFim] = useState('')
   const [estruturaId, setEstruturaId] = useState<number | undefined>()
   const [formAberto, setFormAberto] = useState<TipoMovimentoTesouraria | null>(null)
   const [aExportar, setAExportar] = useState(false)
@@ -53,14 +56,20 @@ export function TesourariaPage() {
   const opcoesEstrutura = useMemo(() => {
     if (nivel === 'diocese') return (dioceses ?? []).map((d) => ({ id: d.id, nome: d.nome }))
     if (nivel === 'vigararia') return (vigararias ?? []).map((v) => ({ id: v.id, nome: v.nome }))
-    if (nivel === 'agrupamento') return (agrupamentos ?? []).map((a) => ({ id: a.id, nome: a.nome }))
+    if (nivel === 'agrupamento') {
+      return [...(agrupamentos ?? [])]
+        .sort((x, y) => (Number(x.ab_agrupamento) || 0) - (Number(y.ab_agrupamento) || 0))
+        .map((a) => ({ id: a.id, nome: formatarAgrupamento(a) }))
+    }
     return []
   }, [nivel, dioceses, vigararias, agrupamentos])
 
   const nomeEstrutura = opcoesEstrutura.find((o) => o.id === estruturaId)?.nome
 
   const contaPronta = nivel === 'nacional' || estruturaId !== undefined
-  const conta = contaPronta ? { nivel, estruturaId: nivel === 'nacional' ? null : (estruturaId ?? null) } : null
+  const conta = contaPronta
+    ? { nivel, estruturaId: nivel === 'nacional' ? null : (estruturaId ?? null), dataInicio: dataInicio || undefined, dataFim: dataFim || undefined }
+    : null
 
   const { data: saldo, isLoading: aCarregarSaldo } = useSaldoTesouraria(conta)
   const { data: movimentos, isLoading: aCarregarMovimentos } = useMovimentosTesouraria(conta)
@@ -142,6 +151,21 @@ export function TesourariaPage() {
               </SelectField>
             </Campo>
           </div>
+        )}
+        <div className="min-w-[150px]">
+          <Campo label="De">
+            <TextField type="date" value={dataInicio} max={dataFim || undefined} onChange={(e) => setDataInicio(e.target.value)} />
+          </Campo>
+        </div>
+        <div className="min-w-[150px]">
+          <Campo label="Até">
+            <TextField type="date" value={dataFim} min={dataInicio || undefined} onChange={(e) => setDataFim(e.target.value)} />
+          </Campo>
+        </div>
+        {(dataInicio || dataFim) && (
+          <button type="button" onClick={() => { setDataInicio(''); setDataFim('') }} className="mb-1 text-[12px] font-medium text-muted underline hover:text-text">
+            Limpar datas
+          </button>
         )}
       </Card>
 

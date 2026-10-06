@@ -1,4 +1,14 @@
 export type StatusPedido = 'pendente' | 'aguardando_pagamento' | 'pago' | 'pronto' | 'enviado' | 'entregue' | 'cancelado'
+/** Rótulos dos estados (o cliente já enviou o comprovativo → "Pagamento em validação"). */
+export const STATUS_LABEL: Record<StatusPedido, string> = {
+  pendente: 'Pendente',
+  aguardando_pagamento: 'Pagamento em validação',
+  pago: 'Pago',
+  pronto: 'Pronta p/ levantar',
+  enviado: 'Enviada',
+  entregue: 'Entregue/Levantada',
+  cancelado: 'Cancelada',
+}
 export type EstadoStockPedido = 'nenhum' | 'reservado' | 'baixado' | 'libertado'
 export type StatusLinha = 'PENDENTE' | 'CONFIRMADO' | 'ENTREGUE'
 
@@ -40,6 +50,7 @@ export interface PedidoPainel {
   total: string
   observacoes: ObservacoesPedido | null
   levantado_em: string | null
+  observacao_entrega?: string | null
   cancelado_em: string | null
   metodo_pagamento: string | null
   referencia_pagamento: string | null

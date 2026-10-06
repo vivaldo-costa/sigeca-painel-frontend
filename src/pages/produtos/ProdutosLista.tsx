@@ -108,7 +108,7 @@ export function ProdutosLista() {
           <Card key={p.id} className="hover-lift animate-slide-up overflow-hidden" style={{ animationDelay: `${Math.min(i, 12) * 30}ms` }}>
             <div className="relative aspect-square bg-bg">
               {p.imagem ? (
-                <img src={uploadUrl('produtos', p.imagem)!} className="size-full object-cover" alt={p.nome} loading="lazy" />
+                <img src={uploadUrl('produtos', p.imagem)!} className="size-full bg-white object-contain p-1" alt={p.nome} loading="lazy" />
               ) : (
                 <div className="grid size-full place-items-center text-subtle"><Package className="size-8" /></div>
               )}

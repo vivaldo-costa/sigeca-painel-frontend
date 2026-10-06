@@ -20,6 +20,8 @@ function paraFormData(payload: VotacaoFormPayload, imagem: File | null) {
   form.append('data_fim', payload.data_fim)
   form.append('ativo', payload.ativo ? '1' : '0')
   if (imagem) form.append('imagem', imagem)
+  if (payload.imagens_manter) form.append('imagens_manter', JSON.stringify(payload.imagens_manter))
+  for (const f of payload.imagens_novas ?? []) form.append('imagens', f)
   return form
 }
 

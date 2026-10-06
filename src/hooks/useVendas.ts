@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import type { VendaResumo, VendaDetalhe } from '@/types/venda'
+import type { VendaResumo, VendaDetalhe, ItemVendaListagem } from '@/types/venda'
 
 export function useVendas(pesquisa: string) {
   return useQuery({
@@ -40,5 +40,41 @@ export function useCriarVenda() {
       queryClient.invalidateQueries({ queryKey: ['painel-produtos'] })
       ;['stock-inventario', 'stock-variantes', 'stock-movimentos', 'stock-resumo'].forEach((k) => queryClient.invalidateQueries({ queryKey: [k] }))
     },
+  })
+}
+
+export interface FiltrosItensVenda {
+  produto_id?: number
+  tamanho?: string
+  diocese_id?: number
+  agrupamento_id?: number
+  origem?: '' | 'pos' | 'portal'
+  status?: string
+  por_entregar?: boolean
+  pesquisa?: string
+  data_inicio?: string
+  data_fim?: string
+}
+
+/** Listagem por artigo — cada linha um artigo vendido, com comprador, contacto, diocese e agrupamento. */
+export function useItensVenda(filtros: FiltrosItensVenda) {
+  return useQuery({
+    queryKey: ['painel-vendas-itens', filtros],
+    queryFn: async () => {
+      const { data } = await api.get<{ dados: ItemVendaListagem[]; limite: number }>('/vendas/itens', { params: filtros })
+      return data
+    },
+  })
+}
+
+/** Agrupamentos de uma diocese (ordem numérica). */
+export function useAgrupamentosDaDiocese(dioceseId?: number) {
+  return useQuery({
+    queryKey: ['painel-agrupamentos-diocese', dioceseId],
+    queryFn: async () => {
+      const { data } = await api.get<{ dados: { id: number; nome: string; ab_agrupamento: string | null }[] }>('/filtros/agrupamentos', { params: { diocese: dioceseId } })
+      return data.dados
+    },
+    enabled: !!dioceseId,
   })
 }
