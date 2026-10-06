@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ShoppingCart, Search, Plus, Minus, Trash2, Loader2, UserRound, CircleCheck } from 'lucide-react'
-import { useProdutos } from '@/hooks/useProdutosPainel'
+import { useVariantesVenda } from '@/hooks/useStock'
+import { useConfirmar } from '@/components/ui/ConfirmProvider'
+import { descreverVariante, type LinhaInventario } from '@/types/stock'
 import { useUtilizadores } from '@/hooks/useUtilizadores'
 import { useCriarVenda } from '@/hooks/useVendas'
 import { getApiErrorMessage } from '@/lib/api'
@@ -13,7 +15,18 @@ import { METODOS_PAGAMENTO, type ItemCarrinhoPos } from '@/types/venda'
 export function VendaPosPage() {
   const navigate = useNavigate()
   const [pesquisaProduto, setPesquisaProduto] = useState('')
-  const { data: produtos } = useProdutos({ pesquisa: pesquisaProduto, ativo: '1' })
+  const { data: variantes } = useVariantesVenda(pesquisaProduto)
+  const confirmar = useConfirmar()
+
+  // Agrupa as variantes por produto (o POS escolhe sempre a VARIANTE: tamanho/cor/modelo)
+  const produtos = useMemo(() => {
+    const mapa = new Map<number, { id: number; nome: string; imagem: string | null; variantes: LinhaInventario[] }>()
+    for (const v of variantes ?? []) {
+      if (!mapa.has(v.produto_id)) mapa.set(v.produto_id, { id: v.produto_id, nome: v.produto_nome, imagem: v.produto_imagem, variantes: [] })
+      mapa.get(v.produto_id)!.variantes.push(v)
+    }
+    return [...mapa.values()]
+  }, [variantes])
 
   const [carrinho, setCarrinho] = useState<ItemCarrinhoPos[]>([])
 
@@ -26,25 +39,40 @@ export function VendaPosPage() {
 
   const criarVenda = useCriarVenda()
 
-  function adicionarAoCarrinho(produto: { id: number; nome: string; preco: string; stock: number }) {
+  function quantidadeNoCarrinho(variacaoId: number) {
+    return carrinho.find((i) => i.variacao_id === variacaoId)?.quantidade ?? 0
+  }
+
+  function adicionarAoCarrinho(v: LinhaInventario) {
+    if (quantidadeNoCarrinho(v.variacao_id) >= v.stock_disponivel) {
+      notificar.aviso(`Stock insuficiente. Existem apenas ${v.stock_disponivel} unidades disponíveis.`)
+      return
+    }
     setCarrinho((c) => {
-      const existente = c.find((i) => i.produto_id === produto.id)
-      if (existente) {
-        if (existente.quantidade >= produto.stock) return c
-        return c.map((i) => (i.produto_id === produto.id ? { ...i, quantidade: i.quantidade + 1 } : i))
-      }
-      if (produto.stock < 1) return c
-      return [...c, { produto_id: produto.id, nome: produto.nome, preco: Number(produto.preco), quantidade: 1, stock: produto.stock }]
+      const existente = c.find((i) => i.variacao_id === v.variacao_id)
+      if (existente) return c.map((i) => (i.variacao_id === v.variacao_id ? { ...i, quantidade: i.quantidade + 1, stock: v.stock_disponivel } : i))
+      const nome = v.padrao ? v.produto_nome : `${v.produto_nome} — ${descreverVariante(v)}`
+      return [...c, {
+        produto_id: v.produto_id, variacao_id: v.variacao_id, sku: v.sku, nome, preco: Number(v.preco),
+        quantidade: 1, stock: v.stock_disponivel, tamanho: v.tamanho, cor: v.cor,
+      }]
     })
   }
 
-  function alterarQuantidade(produtoId: number, delta: number) {
-    setCarrinho((c) => c
-      .map((i) => (i.produto_id === produtoId ? { ...i, quantidade: Math.min(Math.max(i.quantidade + delta, 1), i.stock) } : i)))
+  function alterarQuantidade(variacaoId: number, delta: number) {
+    setCarrinho((c) => c.map((i) => {
+      if (i.variacao_id !== variacaoId) return i
+      const nova = i.quantidade + delta
+      if (nova > i.stock) {
+        notificar.aviso(`Stock insuficiente. Existem apenas ${i.stock} unidades disponíveis.`)
+        return i
+      }
+      return { ...i, quantidade: Math.max(nova, 1) }
+    }))
   }
 
-  function removerDoCarrinho(produtoId: number) {
-    setCarrinho((c) => c.filter((i) => i.produto_id !== produtoId))
+  function removerDoCarrinho(variacaoId: number) {
+    setCarrinho((c) => c.filter((i) => i.variacao_id !== variacaoId))
   }
 
   const total = carrinho.reduce((soma, i) => soma + i.preco * i.quantidade, 0)
@@ -53,12 +81,18 @@ export function VendaPosPage() {
     setSucesso(null)
     if (!comprador) { notificar.erro('Escolhe o comprador.'); return }
     if (carrinho.length === 0) { notificar.erro('Adiciona pelo menos um artigo.'); return }
+    const ok = await confirmar({
+      titulo: 'Confirmar venda',
+      mensagem: `Registar a venda de ${carrinho.reduce((n, i) => n + i.quantidade, 0)} artigo(s) a ${comprador.nome}, no total de ${total.toLocaleString('pt-PT')} Kz (${metodoPagamento})? O stock é baixado de imediato.`,
+      textoConfirmar: 'Confirmar venda',
+    })
+    if (!ok) return
 
     try {
       const resultado = await criarVenda.mutateAsync({
         utilizador_id: comprador.id,
         metodo_pagamento: metodoPagamento,
-        itens: carrinho.map((i) => ({ produto_id: i.produto_id, quantidade: i.quantidade })),
+        itens: carrinho.map((i) => ({ produto_id: i.produto_id, variacao_id: i.variacao_id, quantidade: i.quantidade })),
       })
       setSucesso(`Venda #${resultado.dados.id} registada — ${total.toLocaleString('pt-PT')} Kz`)
       setCarrinho([])
@@ -92,22 +126,44 @@ export function VendaPosPage() {
           </Card>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {produtos?.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => adicionarAoCarrinho(p)}
-                disabled={p.stock < 1}
-                className="flex flex-col items-start rounded-xl border border-border bg-white p-3 text-left transition hover:border-[#111827] disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                {p.imagem && (
-                  <img src={uploadUrl('produtos', p.imagem) ?? undefined} alt={p.nome} className="mb-2 h-20 w-full rounded-lg object-cover" />
-                )}
-                <p className="line-clamp-2 text-[12.5px] font-medium text-text">{p.nome}</p>
-                <p className="mt-1 text-[13px] font-bold text-text">{Number(p.preco).toLocaleString('pt-PT')} Kz</p>
-                <p className="text-[10.5px] text-subtle">{p.stock} em stock</p>
-              </button>
-            ))}
-            {produtos?.length === 0 && <p className="col-span-full py-8 text-center text-[12.5px] text-subtle">Nenhum produto encontrado.</p>}
+            {produtos.map((p) => {
+              const unica = p.variantes.length === 1 ? p.variantes[0] : null
+              const totalDisponivel = p.variantes.reduce((n, v) => n + Math.max(v.stock_disponivel, 0), 0)
+              return (
+                <div key={p.id} className={`flex flex-col rounded-xl border border-border bg-white p-3 text-left ${totalDisponivel < 1 ? 'opacity-50' : ''}`}>
+                  <button
+                    type="button"
+                    onClick={() => unica && adicionarAoCarrinho(unica)}
+                    disabled={!unica || unica.stock_disponivel < 1}
+                    className="flex flex-col items-start text-left disabled:cursor-default"
+                  >
+                    {p.imagem && (
+                      <img src={uploadUrl('produtos', p.imagem) ?? undefined} alt={p.nome} className="mb-2 h-20 w-full rounded-lg object-cover" />
+                    )}
+                    <p className="line-clamp-2 text-[12.5px] font-medium text-text">{p.nome}</p>
+                    <p className="mt-1 text-[13px] font-bold text-text">{Number(p.variantes[0]?.preco ?? 0).toLocaleString('pt-PT')} Kz</p>
+                    <p className="text-[10.5px] text-subtle">{totalDisponivel} disponível(eis)</p>
+                  </button>
+                  {!unica && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {p.variantes.map((v) => (
+                        <button
+                          key={v.variacao_id}
+                          type="button"
+                          onClick={() => adicionarAoCarrinho(v)}
+                          disabled={v.stock_disponivel < 1}
+                          title={`${v.sku ?? ''} · ${v.stock_disponivel} disponível(eis) · ${Number(v.preco).toLocaleString('pt-PT')} Kz`}
+                          className="rounded-md border border-border px-1.5 py-0.5 text-[10.5px] font-medium text-text hover:border-[#111827] disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          {descreverVariante(v)} <span className="text-subtle">({v.stock_disponivel})</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+            {variantes && produtos.length === 0 && <p className="col-span-full py-8 text-center text-[12.5px] text-subtle">Nenhum produto encontrado.</p>}
           </div>
         </div>
 
@@ -148,20 +204,20 @@ export function VendaPosPage() {
             <p className="mb-2 text-[12.5px] font-semibold text-muted">Artigos</p>
             <div className="mb-4 max-h-[300px] space-y-1.5 overflow-y-auto">
               {carrinho.map((i) => (
-                <div key={i.produto_id} className="flex items-center justify-between gap-2 rounded-lg bg-bg px-3 py-2 text-[12.5px]">
+                <div key={i.variacao_id} className="flex items-center justify-between gap-2 rounded-lg bg-bg px-3 py-2 text-[12.5px]">
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-text">{i.nome}</p>
-                    <p className="text-[11px] text-subtle">{i.preco.toLocaleString('pt-PT')} Kz cada</p>
+                    <p className="text-[11px] text-subtle">{i.preco.toLocaleString('pt-PT')} Kz cada · {i.stock} disp.{i.sku ? ` · ${i.sku}` : ''}</p>
                   </div>
                   <div className="flex shrink-0 items-center gap-1.5">
-                    <button onClick={() => alterarQuantidade(i.produto_id, -1)} className="rounded-full border border-border p-1 hover:bg-white"><Minus className="size-3" /></button>
+                    <button onClick={() => alterarQuantidade(i.variacao_id, -1)} className="rounded-full border border-border p-1 hover:bg-white"><Minus className="size-3" /></button>
                     <span className="w-5 text-center font-semibold text-text">{i.quantidade}</span>
-                    <button onClick={() => alterarQuantidade(i.produto_id, 1)} className="rounded-full border border-border p-1 hover:bg-white"><Plus className="size-3" /></button>
-                    <button onClick={() => removerDoCarrinho(i.produto_id)} className="ml-1 text-red-400 hover:text-red-600"><Trash2 className="size-3.5" /></button>
+                    <button onClick={() => alterarQuantidade(i.variacao_id, 1)} className="rounded-full border border-border p-1 hover:bg-white"><Plus className="size-3" /></button>
+                    <button onClick={() => removerDoCarrinho(i.variacao_id)} className="ml-1 text-red-400 hover:text-red-600"><Trash2 className="size-3.5" /></button>
                   </div>
                 </div>
               ))}
-              {carrinho.length === 0 && <p className="py-6 text-center text-[12px] text-subtle">Toca num produto à esquerda para adicionar.</p>}
+              {carrinho.length === 0 && <p className="py-6 text-center text-[12px] text-subtle">Toca num produto (ou no tamanho/cor) à esquerda para adicionar.</p>}
             </div>
 
             <p className="mb-2 text-[12.5px] font-semibold text-muted">Método de pagamento</p>

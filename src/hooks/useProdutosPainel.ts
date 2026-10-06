@@ -53,10 +53,12 @@ function paraFormData(payload: ProdutoFormPayload, imagem: File | null) {
   form.append('preco', payload.preco)
   form.append('preco_antigo', payload.preco_antigo)
   form.append('stock', payload.stock)
+  form.append('sku', payload.sku)
+  form.append('stock_minimo', payload.stock_minimo)
   form.append('ativo', payload.ativo ? '1' : '0')
   form.append('etiqueta', payload.etiqueta)
   form.append('categoria_id', String(payload.categoria_id))
-  form.append('variacoes', JSON.stringify(payload.variacoes.filter((v) => v.tamanho || v.cor)))
+  form.append('variacoes', JSON.stringify(payload.variacoes.filter((v) => !v.padrao && (v.tamanho || v.cor || v.modelo))))
   if (imagem) form.append('imagem', imagem)
   return form
 }

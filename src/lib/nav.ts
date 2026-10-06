@@ -2,7 +2,7 @@ import type { LucideIcon } from 'lucide-react'
 import {
   ChartLine, Church, MapPinned, Landmark, UsersRound, Layers, UserRound,
   Package, Folder, CalendarDays, GraduationCap, CheckSquare, CircleHelp,
-  ShieldCheck, Bell, Flag, ClipboardList, Coins, BadgeCheck, Tent, Settings, DatabaseBackup, Activity, Boxes, Users,
+  ShieldCheck, Bell, Flag, ClipboardList, Coins, BadgeCheck, Tent, Settings, DatabaseBackup, Activity, Boxes, Users, ShoppingBag, Warehouse,
 } from 'lucide-react'
 
 export interface NavItem {
@@ -84,12 +84,21 @@ export const NAV_SECTIONS: NavSection[] = [
         items: [
           { label: 'Nova Venda (POS)', to: '/vendas/pos' },
           { label: 'Consultar Vendas', to: '/vendas' },
-          { label: 'Produtos', to: '/produtos' },
           { label: 'Encomendas', to: '/produtos/encomendas' },
+          { label: 'Devoluções / Trocas', to: '/vendas/retornos' },
+        ],
+      },
+      { label: 'Produtos', icon: ShoppingBag, to: '/produtos' },
+      {
+        label: 'Stock', icon: Warehouse,
+        items: [
+          { label: 'Inventário', to: '/stock' },
+          { label: 'Movimentos', to: '/stock/movimentos' },
+          { label: 'Ajustes', to: '/stock/ajustes' },
         ],
       },
       { label: 'Documentos', icon: Folder, to: '/documentos' },
-      { label: 'Inventário', icon: Boxes, to: '/inventario' },
+      { label: 'Inventário Patrimonial', icon: Boxes, to: '/inventario' },
       {
         label: 'Finanças', icon: Coins,
         items: [

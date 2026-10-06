@@ -1,4 +1,5 @@
-export type StatusPedido = 'pendente' | 'aguardando_pagamento' | 'pago' | 'enviado' | 'entregue' | 'cancelado'
+export type StatusPedido = 'pendente' | 'aguardando_pagamento' | 'pago' | 'pronto' | 'enviado' | 'entregue' | 'cancelado'
+export type EstadoStockPedido = 'nenhum' | 'reservado' | 'baixado' | 'libertado'
 export type StatusLinha = 'PENDENTE' | 'CONFIRMADO' | 'ENTREGUE'
 
 export interface ObservacoesPedido {
@@ -23,6 +24,10 @@ export interface ItemPedidoPainel {
   status: StatusLinha
   tamanho: string | null
   cor: string | null
+  variacao_id: number | null
+  sku: string | null
+  quantidade_devolvida: number
+  origem_troca_item_id: number | null
   produto_nome: string
   produto_imagem: string | null
 }
@@ -30,8 +35,21 @@ export interface ItemPedidoPainel {
 export interface PedidoPainel {
   id: number
   status: StatusPedido
+  estado_stock: EstadoStockPedido
+  origem: 'portal' | 'pos'
   total: string
   observacoes: ObservacoesPedido | null
+  levantado_em: string | null
+  cancelado_em: string | null
+  metodo_pagamento: string | null
+  referencia_pagamento: string | null
+  comprovativo: string | null
+  tipo_entrega: string | null
+  zona_entrega: string | null
+  municipio: string | null
+  bairro: string | null
+  referencia_morada: string | null
+  telefone: string | null
   pdf_recibo: string | null
   pedido_em: string
   entrega_em: string | null
@@ -44,4 +62,6 @@ export interface PedidoPainel {
 
 export interface FiltrosPedidos {
   status?: StatusPedido | ''
+  origem?: 'portal' | 'pos' | ''
+  pesquisa?: string
 }

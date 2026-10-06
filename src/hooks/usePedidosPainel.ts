@@ -19,7 +19,10 @@ export function useAtualizarStatusPedido() {
       const { data } = await api.patch(`/pedidos/${id}/status`, { status })
       return data
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['painel-pedidos'] }),
+    onSuccess: () => {
+      ;['painel-pedidos', 'stock-inventario', 'stock-variantes', 'stock-movimentos', 'stock-resumo', 'painel-produtos']
+        .forEach((k) => queryClient.invalidateQueries({ queryKey: [k] }))
+    },
   })
 }
 

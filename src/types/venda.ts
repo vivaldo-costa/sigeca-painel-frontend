@@ -15,8 +15,12 @@ export interface VendaResumo {
 export interface VendaItem {
   id: number
   produto_id: number
+  variacao_id?: number | null
+  sku?: string | null
   nome: string
   quantidade: number
+  quantidade_devolvida?: number
+  origem_troca_item_id?: number | null
   preco_unitario: number
   subtotal: number
   tamanho: string | null
@@ -29,6 +33,8 @@ export interface VendaDetalhe extends VendaResumo {
 
 export interface ItemCarrinhoPos {
   produto_id: number
+  variacao_id: number
+  sku?: string | null
   nome: string
   preco: number
   quantidade: number

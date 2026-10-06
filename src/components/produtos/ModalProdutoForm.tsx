@@ -1,6 +1,6 @@
 import { copiarLinkProduto } from '@/lib/linkProduto'
-import { useState, type FormEvent } from 'react'
-import { X, Loader2, Plus, Trash2, ImagePlus, Images } from 'lucide-react'
+import { useEffect, useState, type FormEvent } from 'react'
+import { X, Loader2, Plus, Trash2, ImagePlus, Images, Info } from 'lucide-react'
 import {
   useCriarProduto,
   useAtualizarProduto,
@@ -25,17 +25,21 @@ interface Props {
 }
 
 function paraForm(p: ProdutoPainel | null): ProdutoFormPayload {
+  const padrao = p?.variacoes?.find((v) => v.padrao)
   return {
     nome: p?.nome ?? '',
     descricao: p?.descricao ?? '',
     descricao_curta: p?.descricao_curta ?? '',
     preco: p?.preco ?? '',
     preco_antigo: p?.preco_antigo ?? '',
-    stock: p?.stock !== undefined ? String(p.stock) : '',
+    stock: p ? String(p.stock ?? 0) : '',
+    sku: padrao?.sku ?? '',
+    stock_minimo: padrao ? String(padrao.stock_minimo ?? 0) : '0',
     ativo: p ? !!p.ativo : true,
     etiqueta: p?.etiqueta ?? '',
     categoria_id: p?.categoria_id ?? '',
-    variacoes: p?.variacoes?.map((v) => ({ tamanho: v.tamanho, cor: v.cor, stock: v.stock })) ?? [],
+    // A variante "padrão" (produto sem tamanhos/cores) não aparece na lista de variações.
+    variacoes: (p?.variacoes ?? []).filter((v) => !v.padrao).map((v) => ({ ...v, preco: v.preco ?? '' })),
   }
 }
 
@@ -117,6 +121,17 @@ function GaleriaProduto({ produtoId }: { produtoId: number }) {
 
 export function ModalProdutoForm({ produto, onClose }: Props) {
   const [form, setForm] = useState<ProdutoFormPayload>(paraForm(produto))
+  // A lista de produtos não traz as variações — carrega o produto completo
+  // antes de editar (sem isto, guardar apagava as variações existentes).
+  const detalhe = useProduto(produto?.id ?? null)
+  const [carregado, setCarregado] = useState(!produto)
+  useEffect(() => {
+    if (produto && detalhe.data && !carregado) {
+      setForm(paraForm(detalhe.data))
+      setCarregado(true)
+    }
+  }, [produto, detalhe.data, carregado])
+  const padraoActual = detalhe.data?.variacoes?.find((v) => v.padrao)
   const [imagem, setImagem] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
 
@@ -133,13 +148,14 @@ export function ModalProdutoForm({ produto, onClose }: Props) {
   }
 
   function adicionarVariacao() {
-    setForm((f) => ({ ...f, variacoes: [...f.variacoes, { tamanho: '', cor: '', stock: 0 }] }))
+    setForm((f) => ({ ...f, variacoes: [...f.variacoes, { tamanho: '', cor: '', modelo: '', sku: '', preco: '', stock: 0, stock_minimo: 0, ativo: 1 }] }))
   }
 
-  function alterarVariacao(i: number, campo: keyof VariacaoProduto, valor: string) {
+  function alterarVariacao(i: number, campo: keyof VariacaoProduto, valor: string | boolean) {
     setForm((f) => {
       const variacoes = [...f.variacoes]
-      variacoes[i] = { ...variacoes[i], [campo]: campo === 'stock' ? Number(valor) || 0 : valor }
+      const numerico = campo === 'stock' || campo === 'stock_minimo'
+      variacoes[i] = { ...variacoes[i], [campo]: numerico ? Math.max(0, Math.floor(Number(valor) || 0)) : valor }
       return { ...f, variacoes }
     })
   }
@@ -150,6 +166,7 @@ export function ModalProdutoForm({ produto, onClose }: Props) {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
+    if (produto && !carregado) return
     try {
       if (produto) {
         await atualizar.mutateAsync({ id: produto.id, payload: form, imagem })
@@ -197,7 +214,17 @@ export function ModalProdutoForm({ produto, onClose }: Props) {
             <Campo label="Preço antigo (opcional)"><TextField type="number" step="0.01" value={form.preco_antigo} onChange={(e) => setForm((f) => ({ ...f, preco_antigo: e.target.value }))} /></Campo>
           </Linha2>
           <Linha2>
-            <Campo label="Stock"><TextField type="number" required value={form.stock} onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))} /></Campo>
+            {produto ? (
+              <Campo label="Stock (físico / reservado / disponível)">
+                <div className="flex h-10 items-center gap-2 rounded-xl border border-border bg-bg px-3 font-mono text-[12.5px] text-text">
+                  {produto.stock} / {produto.stock_reservado ?? 0} / {produto.stock_disponivel ?? produto.stock}
+                </div>
+              </Campo>
+            ) : form.variacoes.length === 0 ? (
+              <Campo label="Stock inicial"><TextField type="number" min="0" step="1" required value={form.stock} onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))} /></Campo>
+            ) : (
+              <Campo label="Stock"><div className="flex h-10 items-center rounded-xl border border-border bg-bg px-3 text-[12px] text-subtle">Definido por variação (abaixo)</div></Campo>
+            )}
             <Campo label="Categoria">
               <SelectField value={form.categoria_id} onChange={(e) => setForm((f) => ({ ...f, categoria_id: Number(e.target.value) || '' }))}>
                 <option value="">-- Sem categoria --</option>
@@ -215,30 +242,66 @@ export function ModalProdutoForm({ produto, onClose }: Props) {
             </Campo>
           </Linha2>
 
+          {produto && (
+            <p className="flex items-start gap-1.5 rounded-lg bg-badge-blue-bg px-3 py-2 text-[11.5px] text-badge-blue-text">
+              <Info className="mt-0.5 size-3.5 shrink-0" />
+              As quantidades em stock já não se editam aqui: usa <strong className="mx-0.5">Stock → Ajustes</strong> (entrada/saída com motivo),
+              para que cada alteração fique registada nos movimentos.
+            </p>
+          )}
+
+          {form.variacoes.length === 0 && (
+            <Linha2>
+              <Campo label="SKU (opcional — gerado automaticamente)"><TextField value={form.sku} onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))} placeholder={padraoActual?.sku ?? 'Ex.: LEN-001'} /></Campo>
+              <Campo label="Stock mínimo (alerta)"><TextField type="number" min="0" step="1" value={form.stock_minimo} onChange={(e) => setForm((f) => ({ ...f, stock_minimo: e.target.value }))} /></Campo>
+            </Linha2>
+          )}
+
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <label className="text-[13px] font-medium text-muted">Variações (tamanho/cor)</label>
+              <label className="text-[13px] font-medium text-muted">Variantes (tamanho / cor / modelo)</label>
               <button type="button" onClick={adicionarVariacao} className="flex items-center gap-1 text-[12px] font-medium text-[#111827] hover:underline">
                 <Plus className="size-3" /> Adicionar
               </button>
             </div>
             {form.variacoes.length === 0 ? (
-              <p className="text-[12.5px] text-subtle">Sem variações — o produto usa apenas o stock geral.</p>
+              <p className="text-[12.5px] text-subtle">Sem variantes — o produto tem um único artigo (stock geral).</p>
             ) : (
               <div className="space-y-2">
-                {form.variacoes.map((v, i) => (
-                  <div key={i} className="flex gap-2">
-                    <input placeholder="Tamanho" value={v.tamanho} onChange={(e) => alterarVariacao(i, 'tamanho', e.target.value)}
-                      className="w-1/3 rounded-lg border border-border px-2.5 py-1.5 text-[12.5px]" />
-                    <input placeholder="Cor" value={v.cor} onChange={(e) => alterarVariacao(i, 'cor', e.target.value)}
-                      className="w-1/3 rounded-lg border border-border px-2.5 py-1.5 text-[12.5px]" />
-                    <input type="number" placeholder="Stock" value={v.stock} onChange={(e) => alterarVariacao(i, 'stock', e.target.value)}
-                      className="w-1/4 rounded-lg border border-border px-2.5 py-1.5 text-[12.5px]" />
-                    <button type="button" onClick={() => removerVariacao(i)} className="text-badge-red-text hover:opacity-70">
-                      <Trash2 className="size-4" />
-                    </button>
-                  </div>
-                ))}
+                {form.variacoes.map((v, i) => {
+                  const existente = Boolean(v.id)
+                  return (
+                    <div key={v.id ?? `nova-${i}`} className={`space-y-2 rounded-lg border p-2.5 ${v.ativo === 0 || v.ativo === false ? 'border-dashed border-border opacity-60' : 'border-border'}`}>
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                        <input placeholder="Tamanho" value={v.tamanho ?? ''} onChange={(e) => alterarVariacao(i, 'tamanho', e.target.value)} className="rounded-lg border border-border px-2.5 py-1.5 text-[12.5px]" />
+                        <input placeholder="Cor" value={v.cor ?? ''} onChange={(e) => alterarVariacao(i, 'cor', e.target.value)} className="rounded-lg border border-border px-2.5 py-1.5 text-[12.5px]" />
+                        <input placeholder="Modelo" value={v.modelo ?? ''} onChange={(e) => alterarVariacao(i, 'modelo', e.target.value)} className="rounded-lg border border-border px-2.5 py-1.5 text-[12.5px]" />
+                        <input placeholder="SKU (auto)" value={v.sku ?? ''} onChange={(e) => alterarVariacao(i, 'sku', e.target.value)} className="rounded-lg border border-border px-2.5 py-1.5 font-mono text-[12px]" />
+                      </div>
+                      <div className="grid grid-cols-2 items-center gap-2 sm:grid-cols-4">
+                        <input type="number" min="0" step="0.01" placeholder="Preço (opcional)" value={v.preco ?? ''} onChange={(e) => alterarVariacao(i, 'preco', e.target.value)} className="rounded-lg border border-border px-2.5 py-1.5 text-[12.5px]" title="Vazio = usa o preço do produto" />
+                        {existente ? (
+                          <span className="rounded-lg bg-bg px-2.5 py-1.5 font-mono text-[11.5px] text-muted" title="Físico / reservado / disponível">
+                            {v.stock_fisico ?? v.stock} / {v.stock_reservado ?? 0} / {v.stock_disponivel ?? v.stock}
+                          </span>
+                        ) : (
+                          <input type="number" min="0" step="1" placeholder="Stock inicial" value={v.stock || ''} onChange={(e) => alterarVariacao(i, 'stock', e.target.value)} className="rounded-lg border border-border px-2.5 py-1.5 text-[12.5px]" />
+                        )}
+                        <input type="number" min="0" step="1" placeholder="Stock mínimo" value={v.stock_minimo ?? 0} onChange={(e) => alterarVariacao(i, 'stock_minimo', e.target.value)} className="rounded-lg border border-border px-2.5 py-1.5 text-[12.5px]" title="Stock mínimo (alerta de stock baixo)" />
+                        <div className="flex items-center justify-end gap-3">
+                          {existente && (
+                            <label className="flex items-center gap-1 text-[11.5px] text-muted">
+                              <input type="checkbox" className="size-3.5" checked={!(v.ativo === 0 || v.ativo === false)} onChange={(e) => alterarVariacao(i, 'ativo', e.target.checked)} /> Activa
+                            </label>
+                          )}
+                          <button type="button" onClick={() => removerVariacao(i)} className="text-badge-red-text hover:opacity-70" title={existente ? 'Remover (se já tiver movimentos, fica apenas desactivada)' : 'Remover'}>
+                            <Trash2 className="size-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             )}
           </div>
@@ -256,7 +319,7 @@ export function ModalProdutoForm({ produto, onClose }: Props) {
 
           <div className="flex gap-3 border-t border-border pt-4">
             <Button type="button" variant="secondary" onClick={onClose} className="flex-1">Cancelar</Button>
-            <Button type="submit" loading={aGuardar} className="flex-1">
+            <Button type="submit" loading={aGuardar} disabled={Boolean(produto) && !carregado} className="flex-1">
               {aGuardar ? <Loader2 className="size-4 animate-spin" /> : null}
               Guardar
             </Button>

@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Receipt, Loader2, Search, Plus } from 'lucide-react'
+import { Receipt, Loader2, Search, Plus, RotateCcw } from 'lucide-react'
+import { usePermissao } from '@/hooks/usePermissao'
+import { ModalRetorno } from '@/components/vendas/ModalRetorno'
 import { useVendas } from '@/hooks/useVendas'
 import { Card } from '@/components/ui/Card'
 import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
@@ -10,6 +12,8 @@ export function VendasLista() {
   const [pesquisaRascunho, setPesquisaRascunho] = useState('')
   const [pesquisa, setPesquisa] = useState('')
   const { data, isLoading } = useVendas(pesquisa)
+  const { editar: podeEditar } = usePermissao('Produtos')
+  const [retorno, setRetorno] = useState<number | null>(null)
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 py-6 sm:px-6 sm:py-7">
@@ -33,6 +37,9 @@ export function VendasLista() {
             ]}
             linhas={data ?? []}
           />
+          <Link to="/vendas/retornos" className="flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-2 text-[12.5px] font-semibold text-text hover:bg-bg">
+            <RotateCcw className="size-3.5" /> Devoluções / Trocas
+          </Link>
           <Link to="/vendas/pos" className="flex items-center gap-1.5 rounded-lg bg-[#111827] px-3.5 py-2 text-[13px] font-semibold text-white transition hover:bg-black">
             <Plus className="size-3.5" /> Nova Venda
           </Link>
@@ -63,10 +70,11 @@ export function VendasLista() {
               <th className="px-3.5 py-2.5 font-medium">Vendido por</th>
               <th className="px-3.5 py-2.5 font-medium">Data</th>
               <th className="px-3.5 py-2.5 text-right font-medium">Total</th>
+              <th className="px-3.5 py-2.5" />
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {!isLoading && data?.length === 0 && <tr><td colSpan={6} className="py-10 text-center text-subtle">Nenhuma venda registada ainda.</td></tr>}
+            {!isLoading && data?.length === 0 && <tr><td colSpan={7} className="py-10 text-center text-subtle">Nenhuma venda registada ainda.</td></tr>}
             {data?.map((v) => (
               <tr key={v.id} className="transition-colors hover:bg-bg">
                 <td className="px-3.5 py-2.5">
@@ -78,11 +86,20 @@ export function VendasLista() {
                 <td className="px-3.5 py-2.5 text-muted">{v.vendido_por_nome ?? '—'}</td>
                 <td className="px-3.5 py-2.5 text-muted">{new Date(v.pedido_em).toLocaleString('pt-PT')}</td>
                 <td className="px-3.5 py-2.5 text-right font-semibold text-text">{v.total.toLocaleString('pt-PT')} Kz</td>
+                <td className="px-3.5 py-2.5 text-right">
+                  {podeEditar && v.status !== 'cancelado' && (
+                    <button onClick={() => setRetorno(v.id)} title="Devolver / Trocar" className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] font-medium text-text hover:bg-white">
+                      <RotateCcw className="size-3" /> Devolver/Trocar
+                    </button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </Card>
+
+      {retorno !== null && <ModalRetorno pedidoId={retorno} onClose={() => setRetorno(null)} />}
     </div>
   )
 }

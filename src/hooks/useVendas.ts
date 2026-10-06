@@ -30,7 +30,7 @@ export function useCriarVenda() {
       utilizador_id: number
       metodo_pagamento: string
       observacoes?: string
-      itens: { produto_id: number; quantidade: number; tamanho?: string | null; cor?: string | null }[]
+      itens: { produto_id: number; variacao_id?: number; quantidade: number; tamanho?: string | null; cor?: string | null }[]
     }) => {
       const { data } = await api.post<{ dados: VendaDetalhe; mensagem: string }>('/vendas', payload)
       return data
@@ -38,6 +38,7 @@ export function useCriarVenda() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['painel-vendas'] })
       queryClient.invalidateQueries({ queryKey: ['painel-produtos'] })
+      ;['stock-inventario', 'stock-variantes', 'stock-movimentos', 'stock-resumo'].forEach((k) => queryClient.invalidateQueries({ queryKey: [k] }))
     },
   })
 }

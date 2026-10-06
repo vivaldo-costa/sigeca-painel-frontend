@@ -10,6 +10,7 @@ import { KpiRow } from '@/components/dashboard/KpiRow'
 import { EvolucaoEscuteirosCard } from '@/components/dashboard/EvolucaoEscuteirosCard'
 import { SeccoesGeneroCard } from '@/components/dashboard/SeccoesGeneroCard'
 import { DiocesesCard } from '@/components/dashboard/DiocesesCard'
+import { LojaIndicadoresCard } from '@/components/dashboard/LojaIndicadoresCard'
 import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
 import { UltimasAtividadesCard } from '@/components/dashboard/UltimasAtividadesCard'
 import { UltimosRegistosCard } from '@/components/dashboard/UltimosRegistosCard'
@@ -91,6 +92,8 @@ export function DashboardPage() {
           </div>
 
           <KpiRow contadores={data.contadores} crescimento={data.crescimento} />
+
+          <LojaIndicadoresCard />
 
           <EvolucaoEscuteirosCard pontos={data.evolucao_escuteiros} />
 

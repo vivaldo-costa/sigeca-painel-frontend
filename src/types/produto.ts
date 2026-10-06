@@ -7,9 +7,20 @@ export interface Categoria {
 
 export interface VariacaoProduto {
   id?: number
-  tamanho: string
-  cor: string
+  sku?: string | null
+  tamanho: string | null
+  cor: string | null
+  modelo?: string | null
+  /** Preço próprio da variante; vazio = usa o preço do produto. */
+  preco?: string | number | null
+  /** Stock FÍSICO (só editável como "stock inicial" de variantes novas). */
   stock: number
+  stock_fisico?: number
+  stock_reservado?: number
+  stock_disponivel?: number
+  stock_minimo?: number
+  ativo?: number | boolean
+  padrao?: number
 }
 
 export interface ImagemProduto {
@@ -27,6 +38,9 @@ export interface ProdutoPainel {
   preco: string
   preco_antigo: string | null
   stock: number
+  stock_reservado?: number
+  stock_disponivel?: number
+  total_variantes?: number
   ativo: number
   etiqueta: string | null
   categoria_id: number | null
@@ -49,7 +63,11 @@ export interface ProdutoFormPayload {
   descricao_curta: string
   preco: string
   preco_antigo: string
+  /** Stock inicial (só na criação, produtos sem tamanhos/cores). */
   stock: string
+  /** SKU e stock mínimo da variante única (produtos sem tamanhos/cores). */
+  sku: string
+  stock_minimo: string
   ativo: boolean
   etiqueta: string
   categoria_id: number | ''

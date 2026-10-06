@@ -75,6 +75,9 @@ import { TutoriaDetalhePage } from '@/pages/tutorias/TutoriaDetalhePage'
 import { DashboardFormacaoDirigentePage } from '@/pages/dashboardFormacaoDirigente/DashboardFormacaoDirigentePage'
 import { VendaPosPage } from '@/pages/vendas/VendaPosPage'
 import { VendasLista } from '@/pages/vendas/VendasLista'
+import { RetornosLista } from '@/pages/vendas/RetornosLista'
+import { StockInventarioPage } from '@/pages/stock/StockInventarioPage'
+import { StockMovimentosPage } from '@/pages/stock/StockMovimentosPage'
 
 // Rotas ainda nao migradas do painel PHP -> placeholder "em construcao".
 // Path : titulo mostrado na pagina placeholder.
@@ -184,6 +187,10 @@ export default function App() {
         <Route path="/dashboard-formacao-dirigentes" element={<DashboardFormacaoDirigentePage />} />
         <Route path="/vendas" element={<VendasLista />} />
         <Route path="/vendas/pos" element={<VendaPosPage />} />
+        <Route path="/vendas/retornos" element={<RetornosLista />} />
+        <Route path="/stock" element={<StockInventarioPage />} />
+        <Route path="/stock/movimentos" element={<StockMovimentosPage />} />
+        <Route path="/stock/ajustes" element={<StockMovimentosPage key="ajustes" modo="ajustes" />} />
 
         {ROTAS_PENDENTES.map(([path, titulo]) => (
           <Route key={path} path={path} element={<EmConstrucaoPage titulo={titulo} />} />
