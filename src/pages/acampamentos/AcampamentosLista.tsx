@@ -28,7 +28,7 @@ export function AcampamentosLista() {
     <div className="mx-auto max-w-[1300px] px-4 py-6 sm:px-6 sm:py-7">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <h1 className="flex items-center gap-2.5 text-xl font-bold text-text">
-          <Tent className="size-5 text-muted" /> Acampamentos e Eventos
+          <Tent className="size-5 text-muted" /> Gerir eventos
         </h1>
         <ExportarBotoes
           tamanho="sm"

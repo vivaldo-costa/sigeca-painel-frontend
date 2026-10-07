@@ -6,6 +6,7 @@ import { BadgeEstadoUtilizador } from '@/components/crud/BadgesEstado'
 import { AbaDados } from '@/components/utilizadores/AbaDados'
 import { AbaHistorico } from '@/components/utilizadores/AbaHistorico'
 import { AbaTransferir } from '@/components/utilizadores/AbaTransferir'
+import { BotaoReporSenha } from '@/components/utilizadores/BotaoReporSenha'
 import { uploadUrl } from '@/lib/uploads'
 import { cn } from '@/lib/cn'
 
@@ -48,6 +49,7 @@ export function UtilizadorFicha() {
             <BadgeEstadoUtilizador estado={utilizador.estado} />
           </p>
         </div>
+        <BotaoReporSenha utilizadorId={utilizador.id} nome={utilizador.nome} codigo={utilizador.codigo_associado} />
       </div>
 
       <div className="mb-5 flex gap-1 border-b border-border">

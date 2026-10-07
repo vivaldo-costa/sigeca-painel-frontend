@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { NavLink, Link, useLocation } from 'react-router-dom'
 import { ChevronDown, LogOut, X, ShieldCheck } from 'lucide-react'
-import { NAV_DASHBOARD, NAV_SECTIONS, type NavGroup } from '@/lib/nav'
+import { NAV_DASHBOARD, NAV_SECTIONS, filtrarMenu, podeVerModulo, type NavGroup } from '@/lib/nav'
 import { useAuthStore } from '@/store/auth'
 import { useUiStore } from '@/store/ui'
 import { cn } from '@/lib/cn'
@@ -16,6 +16,9 @@ export function Sidebar() {
   const location = useLocation()
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
+  const permissoes = useAuthStore((s) => s.permissoes)
+  // Cada perfil só vê no menu os módulos a que tem acesso (pode_ver)
+  const seccoes = filtrarMenu(NAV_SECTIONS, user?.perfil_nome, permissoes)
   const confirmar = useConfirmar()
   const aparencia = useAparenciaGlobal()
   const [logoFalhou, setLogoFalhou] = useState(false)
@@ -119,9 +122,9 @@ export function Sidebar() {
         </div>
 
         <nav className="no-scrollbar flex-1 space-y-3 overflow-y-auto px-3 py-3">
-          <div className="space-y-0.5">{renderGrupo(NAV_DASHBOARD)}</div>
+          {podeVerModulo(NAV_DASHBOARD.modulo, user?.perfil_nome, permissoes) && <div className="space-y-0.5">{renderGrupo(NAV_DASHBOARD)}</div>}
 
-          {NAV_SECTIONS.map((seccao) => (
+          {seccoes.map((seccao) => (
             <div key={seccao.label}>
               <p className="mb-1 px-3 text-[10.5px] font-bold uppercase tracking-wider text-subtle">{seccao.label}</p>
               <div className="space-y-0.5">{seccao.groups.map(renderGrupo)}</div>

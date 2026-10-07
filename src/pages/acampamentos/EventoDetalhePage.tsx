@@ -11,6 +11,7 @@ import { AbaInventario } from '@/components/acampamentos/AbaInventario'
 import { AbaZonas } from '@/components/acampamentos/AbaZonas'
 import { AbaAlimentacao } from '@/components/acampamentos/AbaAlimentacao'
 import { AbaPrograma } from '@/components/acampamentos/AbaPrograma'
+import { AbaPaineisOficinas } from '@/components/acampamentos/AbaPaineisOficinas'
 import { AbaCredenciais } from '@/components/acampamentos/AbaCredenciais'
 import { AbaScanQr } from '@/components/acampamentos/AbaScanQr'
 import { AbaSaudeOperacional } from '@/components/acampamentos/AbaSaudeOperacional'
@@ -29,6 +30,7 @@ const ABAS = [
   { chave: 'zonas', label: 'Zonas do Campo' },
   { chave: 'alimentacao', label: 'Alimentação' },
   { chave: 'programa', label: 'Programa' },
+  { chave: 'paineis-oficinas', label: 'Painéis e Oficinas' },
   { chave: 'documentos', label: 'Documentos' },
   { chave: 'credenciais', label: 'Credenciais' },
   { chave: 'scan-qr', label: 'Scan QR' },
@@ -82,6 +84,7 @@ export function EventoDetalhePage() {
           {aba === 'zonas' && <AbaZonas atividadeId={atividadeId} />}
           {aba === 'alimentacao' && <AbaAlimentacao atividadeId={atividadeId} />}
           {aba === 'programa' && <AbaPrograma atividadeId={atividadeId} />}
+          {aba === 'paineis-oficinas' && <AbaPaineisOficinas atividadeId={atividadeId} />}
           {aba === 'documentos' && <AbaDocumentos atividadeId={atividadeId} />}
           {aba === 'credenciais' && <AbaCredenciais atividadeId={atividadeId} />}
           {aba === 'scan-qr' && <AbaScanQr atividadeId={atividadeId} />}

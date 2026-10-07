@@ -12,6 +12,20 @@ import { BadgeEstadoTransferencia } from '@/components/crud/BadgesEstado'
 import type { UtilizadorListagem } from '@/types/utilizador'
 import { notificar } from '@/lib/notificar'
 
+/** Motivos mais comuns de transferência entre agrupamentos (escolha obrigatória; "Outro" pede detalhe). */
+export const MOTIVOS_TRANSFERENCIA = [
+  'Mudança de residência',
+  'Estudos noutra localidade',
+  'Motivos profissionais',
+  'Motivos familiares',
+  'Mudança de paróquia',
+  'Agrupamento mais próximo de casa',
+  'Encerramento ou fusão do agrupamento',
+  'Destacamento para outro agrupamento (dirigentes)',
+  'Pedido do próprio ou do encarregado de educação',
+  'Outro',
+] as const
+
 export function AbaTransferir({ utilizador }: { utilizador: UtilizadorListagem }) {
   const user = useAuthStore((s) => s.user)
   const solicitar = useSolicitarTransferencia()
@@ -24,6 +38,7 @@ export function AbaTransferir({ utilizador }: { utilizador: UtilizadorListagem }
   const [paroquiaId, setParoquiaId] = useState<number | undefined>()
   const [agrupamentoDestino, setAgrupamentoDestino] = useState<number | undefined>()
   const [motivo, setMotivo] = useState('')
+  const [motivoDetalhe, setMotivoDetalhe] = useState('')
   const [documento, setDocumento] = useState<File | null>(null)
 
   const dioceses = useOpcoesFiltro('dioceses')
@@ -36,16 +51,19 @@ export function AbaTransferir({ utilizador }: { utilizador: UtilizadorListagem }
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!agrupamentoDestino) return notificar.erro('Selecciona o agrupamento de destino.')
+    if (!motivo) return notificar.erro('Escolhe o motivo da transferência.')
+    if (motivo === 'Outro' && !motivoDetalhe.trim()) return notificar.erro('Descreve o motivo da transferência.')
     if (!documento) return notificar.erro('Anexa a Guia de Marcha ou a Declaração de Transferência.')
     try {
       await solicitar.mutateAsync({
         escuteiro_id: utilizador.id,
         agrupamento_destino_id: agrupamentoDestino,
-        motivo,
+        motivo: motivo === 'Outro' ? motivoDetalhe.trim() : (motivoDetalhe.trim() ? `${motivo} — ${motivoDetalhe.trim()}` : motivo),
         documento,
       })
       notificar.sucesso('Pedido de transferência criado, a aguardar decisão.')
       setMotivo('')
+      setMotivoDetalhe('')
       setDocumento(null)
       setAgrupamentoDestino(undefined)
     } catch (err) {
@@ -93,8 +111,16 @@ export function AbaTransferir({ utilizador }: { utilizador: UtilizadorListagem }
           </div>
 
           <Campo label="Motivo">
-            <TextField required value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Ex: Mudança de residência" />
+            <SelectField required value={motivo} onChange={(e) => setMotivo(e.target.value)}>
+              <option value="">-- Escolher o motivo --</option>
+              {MOTIVOS_TRANSFERENCIA.map((m) => <option key={m} value={m}>{m}</option>)}
+            </SelectField>
           </Campo>
+          {motivo && (
+            <Campo label={motivo === 'Outro' ? 'Descreve o motivo (obrigatório)' : 'Detalhe (opcional)'}>
+              <TextField required={motivo === 'Outro'} maxLength={255} value={motivoDetalhe} onChange={(e) => setMotivoDetalhe(e.target.value)} />
+            </Campo>
+          )}
 
           <div>
             <label className="mb-1.5 block text-[13px] font-medium text-muted">

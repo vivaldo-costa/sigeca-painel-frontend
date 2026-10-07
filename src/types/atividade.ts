@@ -4,6 +4,9 @@ export type EstadoInscricao = 'pendente' | 'confirmada' | 'pago' | 'cancelada'
 
 export interface AtividadePainel {
   id: number
+  abrangencia?: 'nacional' | 'dioceses'
+  dioceses_ids?: number[]
+  dioceses_nomes?: string[]
   tipo: TipoAtividade
   titulo: string
   descricao: string | null
@@ -68,4 +71,6 @@ export interface AtividadeFormPayload {
   ativo: boolean
   diocese_id: number | ''
   seccao_id: number | ''
+  abrangencia: 'nacional' | 'dioceses'
+  dioceses_ids: number[]
 }

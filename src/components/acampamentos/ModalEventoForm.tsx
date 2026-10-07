@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { X, Loader2 } from 'lucide-react'
 import { useCriarAcampamento, useAtualizarAcampamento } from '@/hooks/useAcampamentos'
 import { getApiErrorMessage } from '@/lib/api'
+import { CampoAbrangencia } from '@/components/atividades/CampoAbrangencia'
 import { Button } from '@/components/ui/Button'
 import { Campo, Linha2, TextField, SelectField } from '@/components/crud/FormShell'
 import type { EventoDetalhe, EventoFormPayload, NivelOrganizador } from '@/types/acampamento'
@@ -19,6 +20,8 @@ function paraForm(e: EventoDetalhe | null): EventoFormPayload {
     data_fim: e?.data_fim ? e.data_fim.slice(0, 10) : '',
     nivel_organizador: e?.nivel_organizador ?? '',
     nivel_organizador_id: e?.nivel_organizador_id ?? '',
+    abrangencia: e?.abrangencia ?? 'nacional',
+    dioceses_ids: e?.dioceses_ids ?? [],
     prazo_inscricao: e?.prazo_inscricao ? e.prazo_inscricao.slice(0, 10) : '',
     vagas: e?.vagas ? String(e.vagas) : '',
     capacidade_minima: e?.capacidade_minima ? String(e.capacidade_minima) : '',
@@ -67,6 +70,9 @@ export function ModalEventoForm({ evento, onClose }: Props) {
               className="w-full resize-none rounded-xl border border-border px-3.5 py-2 text-[13px] outline-none focus:border-[#111827]"
             />
           </Campo>
+
+          <CampoAbrangencia abrangencia={form.abrangencia} diocesesIds={form.dioceses_ids}
+            onChange={(v) => setForm((f) => ({ ...f, ...v }))} />
 
           <Campo label="Local"><TextField value={form.local} onChange={(e) => setForm((f) => ({ ...f, local: e.target.value }))} /></Campo>
 

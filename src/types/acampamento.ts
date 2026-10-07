@@ -31,6 +31,9 @@ export interface EventoDocumento {
 }
 
 export interface EventoDetalhe extends Omit<EventoResumo, 'total_delegacoes' | 'total_confirmados'> {
+  abrangencia?: 'nacional' | 'dioceses'
+  dioceses_ids?: number[]
+  dioceses_nomes?: string[]
   descricao: string | null
   nivel_organizador_id: number | null
   prazo_inscricao: string | null
@@ -52,6 +55,8 @@ export interface EventoFormPayload {
   valor: string
   director_id: number | ''
   ativo: boolean
+  abrangencia: 'nacional' | 'dioceses'
+  dioceses_ids: number[]
 }
 
 export const ESTADOS_EVENTO: EstadoEvento[] = ['preparacao', 'inscricoes_abertas', 'em_curso', 'encerrado', 'arquivado']

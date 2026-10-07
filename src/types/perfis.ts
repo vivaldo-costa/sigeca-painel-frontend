@@ -1,8 +1,20 @@
+/** Visibilidade dos dados para quem tem o perfil. */
+export type AmbitoPerfil = 'global' | 'diocese' | 'vigararia' | 'paroquia' | 'agrupamento' | 'seccao'
+export const AMBITO_LABEL: Record<AmbitoPerfil, string> = {
+  global: 'Nacional (vê tudo)',
+  diocese: 'Diocese',
+  vigararia: 'Vigararia',
+  paroquia: 'Paróquia',
+  agrupamento: 'Agrupamento',
+  seccao: 'Secção',
+}
+
 export interface PerfilAcesso {
   id: number
   nome: string
   descricao: string | null
   protegido: boolean | number
+  ambito: AmbitoPerfil
   created_at: string
   total_utilizadores: number
 }
@@ -41,4 +53,5 @@ export type MapaPermissoes = Record<number, AcoesModulo>
 export interface PerfilFormPayload {
   nome: string
   descricao: string
+  ambito?: AmbitoPerfil
 }

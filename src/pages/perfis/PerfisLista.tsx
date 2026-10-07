@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { ShieldCheck, Users, LockOpen, Pencil, Trash2, Plus, Loader2 } from 'lucide-react'
+import { ShieldCheck, Users, LockOpen, Pencil, Trash2, Plus, Loader2, Eye } from 'lucide-react'
 import { usePerfisAcesso, useRemoverPerfilAcesso } from '@/hooks/usePerfisAcesso'
 import { useAuthStore } from '@/store/auth'
 import { Card } from '@/components/ui/Card'
 import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
 import { ModalPerfilForm } from '@/components/perfis/ModalPerfilForm'
 import { ModalPermissoes } from '@/components/perfis/ModalPermissoes'
-import type { PerfilAcesso } from '@/types/perfis'
+import { AMBITO_LABEL, type PerfilAcesso } from '@/types/perfis'
 
 const CORES: Record<string, string> = {
   ADMIN: 'bg-badge-red-bg text-badge-red-text',
@@ -53,6 +53,7 @@ export function PerfisLista() {
             colunas={[
               { titulo: 'Nome', valor: (p: PerfilAcesso) => p.nome },
               { titulo: 'Tipo', valor: (p) => (p.protegido ? 'Sistema' : 'Personalizado') },
+              { titulo: 'Visibilidade', valor: (p) => AMBITO_LABEL[p.ambito] ?? p.ambito },
               { titulo: 'Descrição', valor: (p) => p.descricao || '—' },
               { titulo: 'Utilizadores', valor: (p) => p.total_utilizadores },
             ]}
@@ -97,6 +98,10 @@ export function PerfisLista() {
               <Users className="size-3.5 text-[#111827]" />
               <span>{p.total_utilizadores} utilizador{p.total_utilizadores !== 1 && 'es'} com este perfil</span>
             </div>
+            <div className="flex items-center gap-2 rounded-lg bg-bg px-3 py-2 text-sm text-text">
+              <Eye className="size-3.5 text-[#111827]" />
+              <span>Visibilidade: <b>{AMBITO_LABEL[p.ambito] ?? p.ambito}</b></span>
+            </div>
 
             <div className="flex gap-2 border-t border-border pt-3">
               <button
@@ -105,14 +110,17 @@ export function PerfisLista() {
               >
                 <LockOpen className="size-3.5" /> Permissões
               </button>
+              {ehAdmin && p.nome !== 'ADMIN' && (
+                <button
+                  onClick={() => setModalForm(p)}
+                  title={p.protegido ? 'Alterar visibilidade' : 'Editar'}
+                  className="flex items-center justify-center gap-1.5 rounded-lg border border-amber-200 px-3 py-2 text-xs text-amber-600 transition hover:bg-amber-50"
+                >
+                  <Pencil className="size-3.5" />
+                </button>
+              )}
               {ehAdmin && !p.protegido && (
                 <>
-                  <button
-                    onClick={() => setModalForm(p)}
-                    className="flex items-center justify-center gap-1.5 rounded-lg border border-amber-200 px-3 py-2 text-xs text-amber-600 transition hover:bg-amber-50"
-                  >
-                    <Pencil className="size-3.5" />
-                  </button>
                   <button
                     onClick={() => handleEliminar(p.id)}
                     disabled={remover.isPending}

@@ -3,7 +3,7 @@ import { X, Loader2 } from 'lucide-react'
 import { useCriarPerfil, useAtualizarPerfilAcesso } from '@/hooks/usePerfisAcesso'
 import { getApiErrorMessage } from '@/lib/api'
 import { Button } from '@/components/ui/Button'
-import type { PerfilAcesso } from '@/types/perfis'
+import { AMBITO_LABEL, type AmbitoPerfil, type PerfilAcesso } from '@/types/perfis'
 import { notificar } from '@/lib/notificar'
 
 interface Props {
@@ -16,6 +16,8 @@ export function ModalPerfilForm({ perfil, onClose }: Props) {
   const atualizar = useAtualizarPerfilAcesso()
   const [nome, setNome] = useState(perfil?.nome ?? '')
   const [descricao, setDescricao] = useState(perfil?.descricao ?? '')
+  const [ambito, setAmbito] = useState<AmbitoPerfil>(perfil?.ambito ?? 'agrupamento')
+  const sistema = !!perfil?.protegido
 
   const aGuardar = criar.isPending || atualizar.isPending
 
@@ -23,9 +25,9 @@ export function ModalPerfilForm({ perfil, onClose }: Props) {
     e.preventDefault()
     try {
       if (perfil) {
-        await atualizar.mutateAsync({ id: perfil.id, payload: { nome, descricao } })
+        await atualizar.mutateAsync({ id: perfil.id, payload: { nome, descricao, ambito } })
       } else {
-        await criar.mutateAsync({ nome, descricao })
+        await criar.mutateAsync({ nome, descricao, ambito })
       }
       onClose()
     } catch (err) {
@@ -52,19 +54,32 @@ export function ModalPerfilForm({ perfil, onClose }: Props) {
             <input
               type="text"
               required
+              disabled={sistema}
               maxLength={50}
               value={nome}
-              onChange={(e) => setNome(e.target.value.toUpperCase())}
+              onChange={(e) => setNome(e.target.value.toUpperCase().replace(/\s+/g, '_'))}
               placeholder="Ex: GESTOR"
               className="w-full rounded-xl border border-border px-4 py-2.5 text-sm uppercase outline-none focus:ring-2 focus:ring-[#111827]/30"
             />
-            <p className="mt-1 text-xs text-subtle">Só letras maiúsculas, sem espaços ou símbolos.</p>
+            <p className="mt-1 text-xs text-subtle">{sistema ? 'Perfil de sistema — só a visibilidade pode ser alterada.' : 'Só letras maiúsculas e _ (ex.: SECRETARIO_DIOCESANO).'}</p>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-muted">Visibilidade dos dados</label>
+            <select value={ambito} onChange={(e) => setAmbito(e.target.value as AmbitoPerfil)}
+              className="w-full rounded-xl border border-border bg-white px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#111827]/30">
+              {(Object.keys(AMBITO_LABEL) as AmbitoPerfil[]).map((a) => <option key={a} value={a}>{AMBITO_LABEL[a]}</option>)}
+            </select>
+            <p className="mt-1 text-xs text-subtle">
+              Quem tem este perfil só vê escuteiros, transferências e restantes dados da sua {ambito === 'global' ? 'organização inteira' : AMBITO_LABEL[ambito].toLowerCase()} (a da sua própria ficha).
+            </p>
           </div>
 
           <div>
             <label className="mb-1 block text-sm font-medium text-muted">Descrição</label>
             <textarea
               rows={3}
+              disabled={sistema}
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
               placeholder="Descreve brevemente o propósito deste perfil..."

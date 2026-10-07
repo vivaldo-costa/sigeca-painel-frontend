@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { X, Loader2, ImagePlus, Images } from 'lucide-react'
 import { getApiErrorMessage } from '@/lib/api'
 import { uploadUrl } from '@/lib/uploads'
+import { CampoAbrangencia } from '@/components/atividades/CampoAbrangencia'
 import { Button } from '@/components/ui/Button'
 import { Campo, Linha2, TextField, SelectField } from '@/components/crud/FormShell'
 import type { criarHooksAtividade } from '@/hooks/criarHooksAtividade'
@@ -110,6 +111,8 @@ function paraForm(a: AtividadePainel | null): AtividadeFormPayload {
     ativo: a ? !!a.ativo : true,
     diocese_id: a?.diocese_id ?? '',
     seccao_id: a?.seccao_id ?? '',
+    abrangencia: a?.abrangencia ?? 'nacional',
+    dioceses_ids: a?.dioceses_ids ?? [],
   }
 }
 
@@ -182,6 +185,9 @@ export function ModalAtividadeForm({ hooks, atividade, tituloModulo, onClose }: 
             <Campo label="Data de início"><TextField type="date" required value={form.data_inicio} onChange={(e) => setForm((f) => ({ ...f, data_inicio: e.target.value }))} /></Campo>
             <Campo label="Data de fim"><TextField type="date" value={form.data_fim} onChange={(e) => setForm((f) => ({ ...f, data_fim: e.target.value }))} /></Campo>
           </Linha2>
+          <CampoAbrangencia abrangencia={form.abrangencia} diocesesIds={form.dioceses_ids}
+            onChange={(v) => setForm((f) => ({ ...f, ...v }))} />
+
           <Campo label="Local"><TextField value={form.local} onChange={(e) => setForm((f) => ({ ...f, local: e.target.value }))} placeholder="Ex: Luanda" /></Campo>
 
           <Linha2>
