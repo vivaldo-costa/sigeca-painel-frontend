@@ -2,8 +2,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import type { PerfilAcesso, PermissoesPerfil, MapaPermissoes, PerfilFormPayload } from '@/types/perfis'
 
-export function usePerfisAcesso() {
+export function usePerfisAcesso(ativo = true) {
   return useQuery({
+    enabled: ativo,
     queryKey: ['painel-perfis'],
     queryFn: async () => {
       const { data } = await api.get<{ dados: PerfilAcesso[] }>('/perfis')

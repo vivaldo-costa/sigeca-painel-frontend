@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useAtualizarUtilizador } from '@/hooks/useUtilizadores'
+import { usePerfisAcesso } from '@/hooks/usePerfisAcesso'
+import { useOpcoesFiltro } from '@/hooks/useDashboardPainel'
+import { useAuthStore } from '@/store/auth'
 import { useCriarUnidadeSeccao, useUnidadesSeccao, extrairUnidadeExistente } from '@/hooks/useUnidadesSeccao'
 import { getApiErrorMessage } from '@/lib/api'
 import { inferirTipoUnidadeSeccao } from '@/lib/formatadores'
@@ -24,6 +27,9 @@ function montarForm(utilizador: UtilizadorListagem) {
     telefone: utilizador.telefone ?? '',
     estado: utilizador.estado,
     motivo_inativacao: '',
+    perfil_id: utilizador.perfil_id,
+    seccao_id: utilizador.seccao_id ?? '',
+    motivo_mudanca: '',
     data_nascimento: utilizador.data_nascimento ?? '',
     unidade_seccao_id: utilizador.unidade_seccao_id,
     ...utilizadorParaCamposAdicionais(utilizador),
@@ -32,6 +38,9 @@ function montarForm(utilizador: UtilizadorListagem) {
 
 export function AbaDados({ utilizador }: { utilizador: UtilizadorListagem }) {
   const actualizar = useAtualizarUtilizador()
+  const ehAdmin = useAuthStore((s) => s.user?.perfil_nome === 'ADMIN')
+  const { data: perfis } = usePerfisAcesso(ehAdmin)
+  const { data: seccoes } = useOpcoesFiltro('seccoes')
 
   const [form, setForm] = useState(montarForm(utilizador))
 
@@ -46,8 +55,14 @@ export function AbaDados({ utilizador }: { utilizador: UtilizadorListagem }) {
       notificar.aviso('Indica o motivo da inactivação.')
       return
     }
-    const { motivo_inativacao: motivo, ...resto } = form
-    const payload = vaiInactivar ? { ...resto, motivo_inativacao: motivo.trim() } : resto
+    const { motivo_inativacao: motivo, motivo_mudanca: motivoMudanca, perfil_id: perfilId, seccao_id: seccaoId, ...resto } = form
+    const mudouSeccao = Number(seccaoId || 0) !== Number(utilizador.seccao_id || 0)
+    const payload = {
+      ...resto,
+      ...(vaiInactivar ? { motivo_inativacao: motivo.trim() } : {}),
+      ...(ehAdmin && perfilId !== utilizador.perfil_id ? { perfil_id: perfilId } : {}),
+      ...(mudouSeccao ? { seccao_id: Number(seccaoId) || null, motivo_mudanca: motivoMudanca.trim() || undefined } : {}),
+    }
     try {
       await actualizar.mutateAsync({ id: utilizador.id, payload: limparDatasOpcionais(payload) })
       notificar.sucesso('Dados actualizados.')
@@ -76,6 +91,30 @@ export function AbaDados({ utilizador }: { utilizador: UtilizadorListagem }) {
             </SelectField>
           </Campo>
         </Linha2>
+        <Linha2>
+          <Campo label="Secção / Categoria">
+            <SelectField value={form.seccao_id ?? ''} onChange={(e) => setForm((f) => ({ ...f, seccao_id: Number(e.target.value) || '' }))}>
+              <option value="">— Sem secção —</option>
+              {(seccoes ?? []).map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
+            </SelectField>
+          </Campo>
+          <Campo label={ehAdmin ? 'Perfil de acesso' : 'Perfil de acesso (só o ADMIN altera)'}>
+            {ehAdmin ? (
+              <SelectField value={form.perfil_id} onChange={(e) => setForm((f) => ({ ...f, perfil_id: Number(e.target.value) }))}>
+                {(perfis ?? []).map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
+                {!perfis?.some((p) => p.id === form.perfil_id) && <option value={form.perfil_id}>{utilizador.perfil_nome}</option>}
+              </SelectField>
+            ) : (
+              <TextField value={utilizador.perfil_nome ?? '—'} disabled readOnly />
+            )}
+          </Campo>
+        </Linha2>
+        {Number(form.seccao_id || 0) !== Number(utilizador.seccao_id || 0) && (
+          <Campo label="Motivo da mudança de secção (fica no percurso)">
+            <TextField maxLength={255} value={form.motivo_mudanca} placeholder="Ex.: passagem de secção por idade"
+              onChange={(e) => setForm((f) => ({ ...f, motivo_mudanca: e.target.value }))} />
+          </Campo>
+        )}
         {form.estado === 'INATIVO' && utilizador.estado !== 'INATIVO' && (
           <Campo label="Motivo da inactivação (obrigatório)">
             <TextField required maxLength={255} value={form.motivo_inativacao} placeholder="Ex.: deixou de frequentar o agrupamento"
