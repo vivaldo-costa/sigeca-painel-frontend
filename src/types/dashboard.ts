@@ -83,6 +83,9 @@ export interface MudancaSeccao {
 export interface AtividadeResumo {
   titulo: string
   total_inscritos: number
+  confirmados?: number
+  pendentes?: number
+  total_pago?: number
 }
 
 export interface VotacaoResumo {

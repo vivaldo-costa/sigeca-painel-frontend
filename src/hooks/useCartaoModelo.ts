@@ -49,6 +49,19 @@ export function useAtualizarImagemFundoCartao() {
   })
 }
 
+export function useAtualizarImagemFundoVersoCartao() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (ficheiro: File | null) => {
+      const form = new FormData()
+      if (ficheiro) form.append('ficheiro', ficheiro)
+      const { data } = await api.post<{ dados: CartaoModelo }>(`/cartao-modelo/imagem-fundo-verso${ficheiro ? '' : '?remover=1'}`, form, { headers: { 'Content-Type': 'multipart/form-data' } })
+      return data.dados
+    },
+    onSuccess: (dados) => queryClient.setQueryData(['painel-cartao-modelo'], dados),
+  })
+}
+
 export function useCartaoEstatisticas() {
   return useQuery({
     queryKey: ['painel-cartao-estatisticas'],

@@ -5,6 +5,7 @@ export interface CartaoModelo {
   cor_texto: string
   logo_path: string | null
   imagem_fundo_path: string | null
+  imagem_fundo_verso_path?: string | null
   texto_verso: string
   email_contacto: string | null
   website: string | null

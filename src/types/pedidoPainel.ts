@@ -51,6 +51,8 @@ export interface PedidoPainel {
   observacoes: ObservacoesPedido | null
   levantado_em: string | null
   observacao_entrega?: string | null
+  levantamento_nome?: string | null
+  levantamento_telefone?: string | null
   cancelado_em: string | null
   metodo_pagamento: string | null
   referencia_pagamento: string | null

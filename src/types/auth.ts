@@ -4,7 +4,7 @@
  * o sistema" (ver perfis.descricao) — tratado como sem âmbito restrito,
  * tal como ADMIN, na Dashboard do Painel.
  */
-export type Perfil = 'ADMIN' | 'ESCUTEIRO' | 'DIRIGENTE' | 'CONSULTOR' | 'TECNICO'
+export type Perfil = 'ADMIN' | 'ESCUTEIRO' | 'DIRIGENTE' | 'CONSULTOR' | 'TECNICO' | (string & {})
 
 /**
  * Campos garantidos em qualquer resposta autenticada (GET /auth/me devolve

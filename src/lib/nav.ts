@@ -159,3 +159,28 @@ export function filtrarMenu(seccoes: NavSection[], perfilNome: string | undefine
     }))
     .filter((s) => s.groups.length > 0)
 }
+
+/** Módulos que dizem respeito só ao portal — não dão, por si, acesso ao Painel de Gestão. */
+const MODULOS_SO_PORTAL = ['Portal']
+
+/**
+ * O acesso ao painel decide-se pelas permissões reais do perfil (perfil_permissoes),
+ * e não por uma lista fixa de nomes: qualquer perfil com pelo menos um módulo do painel
+ * visível pode entrar e vê apenas esses módulos.
+ */
+export function temAcessoPainel(perfilNome: string | undefined, permissoes: { chave: string; pode_ver: number | boolean }[]) {
+  if (perfilNome === 'ADMIN') return true
+  return permissoes.some((p) => !!p.pode_ver && !MODULOS_SO_PORTAL.includes(p.chave))
+}
+
+/** Primeira página a que o perfil tem acesso (o Dashboard, se o puder ver). */
+export function primeiraRotaPermitida(perfilNome: string | undefined, permissoes: { chave: string; pode_ver: number | boolean }[]): string | null {
+  if (podeVerModulo(NAV_DASHBOARD.modulo, perfilNome, permissoes)) return NAV_DASHBOARD.to ?? '/dashboard'
+  for (const seccao of filtrarMenu(NAV_SECTIONS, perfilNome, permissoes)) {
+    for (const g of seccao.groups) {
+      const destino = g.to ?? g.items?.[0]?.to
+      if (destino) return destino
+    }
+  }
+  return null
+}

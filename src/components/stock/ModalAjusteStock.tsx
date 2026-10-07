@@ -68,7 +68,7 @@ export function ModalAjusteStock({ variante: varianteInicial, onClose }: Props) 
               <div>
                 <p className="font-medium text-text">{variante.produto_nome} — {descreverVariante(variante)}</p>
                 <p className="text-[11.5px] text-subtle">
-                  {variante.sku} · físico {variante.stock_fisico} · reservado {variante.stock_reservado} · disponível {variante.stock_disponivel}
+                  {variante.sku} · físico {variante.stock_fisico} · online {variante.stock_reservado} · geral {variante.stock_disponivel}
                 </p>
               </div>
               {!varianteInicial && <button type="button" onClick={() => setVariante(null)} className="text-[11px] text-subtle hover:text-text">Trocar</button>}

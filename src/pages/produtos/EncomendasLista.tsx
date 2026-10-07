@@ -54,11 +54,16 @@ export function EncomendasLista() {
   // Entrega/levantamento: pede uma observação opcional (quem levantou, estado da mercadoria, …)
   const [aEntregar, setAEntregar] = useState<PedidoPainel | null>(null)
   const [observacaoEntrega, setObservacaoEntrega] = useState('')
+  const [quemLevantou, setQuemLevantou] = useState('')
+  const [telefoneLevantou, setTelefoneLevantou] = useState('')
 
   async function confirmarEntrega() {
     if (!aEntregar) return
     try {
-      await atualizarPedido.mutateAsync({ id: aEntregar.id, status: 'entregue', observacao_entrega: observacaoEntrega.trim() || undefined })
+      await atualizarPedido.mutateAsync({
+        id: aEntregar.id, status: 'entregue', observacao_entrega: observacaoEntrega.trim() || undefined,
+        levantamento_nome: quemLevantou.trim() || undefined, levantamento_telefone: telefoneLevantou.trim() || undefined,
+      })
       notificar.sucesso(`Encomenda #${aEntregar.id}: ${ROTULO_PEDIDO.entregue}.`)
       setAEntregar(null)
     } catch (err) {
@@ -69,6 +74,8 @@ export function EncomendasLista() {
   async function mudarEstado(pedido: PedidoPainel, status: StatusPedido) {
     if (status === 'entregue') {
       setObservacaoEntrega('')
+      setQuemLevantou(pedido.utilizador_nome ?? '')
+      setTelefoneLevantou('')
       setAEntregar(pedido)
       return
     }
@@ -179,6 +186,9 @@ export function EncomendasLista() {
                     {pedido.codigo_associado} · {new Date(pedido.pedido_em).toLocaleString('pt-PT')}
                     {pedido.levantado_em && ` · levantada ${new Date(pedido.levantado_em).toLocaleString('pt-PT')}`}
                   </p>
+                  {(pedido.levantamento_nome || pedido.levantamento_telefone) && (
+                    <p className="mt-0.5 text-[11.5px] text-muted">Levantado por: <span className="text-text">{[pedido.levantamento_nome, pedido.levantamento_telefone].filter(Boolean).join(' · ')}</span></p>
+                  )}
                   {pedido.observacao_entrega && (
                     <p className="mt-0.5 text-[11.5px] text-muted">Obs. da entrega: <span className="text-text">{pedido.observacao_entrega}</span></p>
                   )}
@@ -277,7 +287,13 @@ export function EncomendasLista() {
             <p className="mb-3 text-[12.5px] text-muted">
               {aEntregar.estado_stock === 'reservado' ? 'A reserva passa a saída real do stock físico. ' : ''}Podes deixar uma observação (quem levantou, estado da mercadoria, …).
             </p>
-            <textarea value={observacaoEntrega} onChange={(e) => setObservacaoEntrega(e.target.value)} rows={3} maxLength={2000} autoFocus
+            <div className="mb-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <input value={quemLevantou} onChange={(e) => setQuemLevantou(e.target.value)} maxLength={150} placeholder="Quem veio levantar (nome)"
+                className="rounded-lg border border-border px-3 py-2 text-[13px] outline-none focus:border-[#111827]" />
+              <input value={telefoneLevantou} onChange={(e) => setTelefoneLevantou(e.target.value)} maxLength={40} inputMode="tel" placeholder="Telefone de quem levantou"
+                className="rounded-lg border border-border px-3 py-2 text-[13px] outline-none focus:border-[#111827]" />
+            </div>
+            <textarea value={observacaoEntrega} onChange={(e) => setObservacaoEntrega(e.target.value)} rows={3} maxLength={2000}
               placeholder="Observação no acto da entrega (opcional)"
               className="mb-3 w-full resize-none rounded-lg border border-border px-3 py-2 text-[13px] outline-none focus:border-[#111827]" />
             <div className="flex gap-2">

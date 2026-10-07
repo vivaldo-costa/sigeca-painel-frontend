@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Loader2, Save, Upload, Download, Eye, IdCard, Image as ImageIcon, Users, CircleCheck, CircleX, CircleSlash } from 'lucide-react'
 import {
   useCartaoModelo, useAtualizarCartaoModelo, useAtualizarLogoCartao,
-  useAtualizarImagemFundoCartao, useCartaoEstatisticas,
+  useAtualizarImagemFundoCartao, useAtualizarImagemFundoVersoCartao, useCartaoEstatisticas,
 } from '@/hooks/useCartaoModelo'
 import { useAuthStore } from '@/store/auth'
 import { getApiErrorMessage } from '@/lib/api'
@@ -35,6 +35,8 @@ export function CartaoModeloPage() {
   const atualizar = useAtualizarCartaoModelo()
   const atualizarLogo = useAtualizarLogoCartao()
   const atualizarImagemFundo = useAtualizarImagemFundoCartao()
+  const atualizarFundoVerso = useAtualizarImagemFundoVersoCartao()
+  const [versoFalhou, setVersoFalhou] = useState(false)
 
   const [form, setForm] = useState<Partial<CartaoModelo>>({})
   const [logoFalhou, setLogoFalhou] = useState(false)
@@ -142,7 +144,7 @@ export function CartaoModeloPage() {
       </Card>
 
       <Card className="mb-4 p-4">
-        <p className="mb-1 text-[12.5px] font-semibold text-muted">Imagem de fundo do cartão</p>
+        <p className="mb-1 text-[12.5px] font-semibold text-muted">Imagem de fundo da frente</p>
         <p className="mb-3 text-[11.5px] text-subtle">
           Formatos aceites: JPEG, PNG ou WEBP, até 8&nbsp;MB. Para melhor nitidez, usa uma imagem com a mesma proporção do cartão
           (85,6&nbsp;×&nbsp;54&nbsp;mm — ex.: 1012&nbsp;×&nbsp;638&nbsp;px ou maior) — a imagem é cortada centralmente se a proporção não bater certo.
@@ -161,6 +163,34 @@ export function CartaoModeloPage() {
               <Upload className="size-3.5" /> Trocar imagem de fundo
               <input type="file" accept="image/*" className="hidden" onChange={handleEscolherFundo} />
             </label>
+          )}
+        </div>
+      </Card>
+
+      <Card className="mb-4 p-4">
+        <p className="mb-1 text-[12.5px] font-semibold text-muted">Imagem de fundo do verso</p>
+        <p className="mb-3 text-[11.5px] text-subtle">Mesmas regras da frente. Se não enviares nenhuma, o verso usa o mesmo fundo da frente.</p>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="grid h-16 w-[101px] shrink-0 place-items-center overflow-hidden rounded-lg border border-border bg-bg">
+            {data.imagem_fundo_verso_path && !versoFalhou ? (
+              <img src={uploadUrl('cartao', data.imagem_fundo_verso_path) ?? ''} alt="Fundo do verso" className="size-full object-cover" onError={() => setVersoFalhou(true)} />
+            ) : (
+              <span className="px-1 text-center text-[10px] text-subtle">Igual à frente</span>
+            )}
+          </div>
+          {!somenteLeitura && (
+            <>
+              <label className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-[12px] font-medium text-text hover:bg-bg">
+                <Upload className="size-3.5" /> {data.imagem_fundo_verso_path ? 'Trocar fundo do verso' : 'Enviar fundo do verso'}
+                <input type="file" accept="image/*" className="hidden"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) { setVersoFalhou(false); atualizarFundoVerso.mutate(f) } e.target.value = '' }} />
+              </label>
+              {data.imagem_fundo_verso_path && (
+                <button type="button" onClick={() => atualizarFundoVerso.mutate(null)} className="text-[12px] text-badge-red-text hover:underline">
+                  Usar o fundo da frente
+                </button>
+              )}
+            </>
           )}
         </div>
       </Card>

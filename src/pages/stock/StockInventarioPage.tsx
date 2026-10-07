@@ -54,8 +54,8 @@ export function StockInventarioPage() {
               { titulo: 'Tamanho', valor: (l) => l.tamanho ?? '—' },
               { titulo: 'Cor', valor: (l) => l.cor ?? '—' },
               { titulo: 'Físico', valor: (l) => l.stock_fisico },
-              { titulo: 'Reservado', valor: (l) => l.stock_reservado },
-              { titulo: 'Disponível', valor: (l) => l.stock_disponivel },
+              { titulo: 'Online (reservado)', valor: (l) => l.stock_reservado },
+              { titulo: 'Geral (disponível)', valor: (l) => l.stock_disponivel },
               { titulo: 'Mínimo', valor: (l) => l.stock_minimo },
               { titulo: 'Estado', valor: (l) => ESTADO_STOCK_LABEL[l.estado] },
             ]}
@@ -76,8 +76,8 @@ export function StockInventarioPage() {
         <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {[
             ['Stock físico', resumo.fisico, ''],
-            ['Reservado', resumo.reservado, 'text-badge-orange-text'],
-            ['Disponível', resumo.disponivel, 'text-badge-green-text'],
+            ['Online (reservado)', resumo.reservado, 'text-badge-orange-text'],
+            ['Geral (disponível)', resumo.disponivel, 'text-badge-green-text'],
             ['Stock baixo', resumo.variantes_stock_baixo, 'text-badge-orange-text'],
             ['Esgotados', resumo.variantes_sem_stock, 'text-badge-red-text'],
           ].map(([rotulo, valor, cor]) => (
@@ -131,8 +131,8 @@ export function StockInventarioPage() {
               <th className="px-3.5 py-2.5 font-medium">Tamanho</th>
               <th className="px-3.5 py-2.5 font-medium">Cor</th>
               <th className="px-3.5 py-2.5 text-right font-medium">Físico</th>
-              <th className="px-3.5 py-2.5 text-right font-medium">Reservado</th>
-              <th className="px-3.5 py-2.5 text-right font-medium">Disponível</th>
+              <th className="px-3.5 py-2.5 text-right font-medium" title="Reservado por encomendas online ainda não levantadas">Online</th>
+              <th className="px-3.5 py-2.5 text-right font-medium" title="Disponível para venda (físico − online)">Geral</th>
               <th className="px-3.5 py-2.5 text-right font-medium">Mínimo</th>
               <th className="px-3.5 py-2.5 font-medium">Estado</th>
               <th className="px-3.5 py-2.5" />
@@ -144,7 +144,13 @@ export function StockInventarioPage() {
               <tr key={l.variacao_id} className="transition-colors hover:bg-bg">
                 <td className="px-3.5 py-2.5 font-medium text-text">{l.produto_nome}{l.modelo ? <span className="text-subtle"> · {l.modelo}</span> : null}</td>
                 <td className="px-3.5 py-2.5 font-mono text-[11.5px] text-muted">{l.sku ?? '—'}</td>
-                <td className="px-3.5 py-2.5 text-muted">{l.tamanho ?? '—'}</td>
+                <td className="px-3.5 py-2.5 text-muted">
+                  {l.tamanho ?? (l.cor ? '—' : (
+                    <Link to="/produtos" title="Este artigo ainda não tem tamanhos: abre o produto e acrescenta as variantes (ex.: S, M, L), cada uma com o seu stock." className="text-[11.5px] text-badge-blue-text underline">
+                      Sem tamanhos
+                    </Link>
+                  ))}
+                </td>
                 <td className="px-3.5 py-2.5 text-muted">{l.cor ?? '—'}</td>
                 <td className="px-3.5 py-2.5 text-right font-mono">{l.stock_fisico}</td>
                 <td className="px-3.5 py-2.5 text-right font-mono text-badge-orange-text">{l.stock_reservado}</td>
