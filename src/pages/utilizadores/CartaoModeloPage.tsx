@@ -129,7 +129,7 @@ export function CartaoModeloPage() {
             {data.logo_path && !logoFalhou ? (
               <img src={uploadUrl('cartao', data.logo_path) ?? ''} alt="Logótipo" className="size-full object-cover" onError={() => setLogoFalhou(true)} />
             ) : (
-              <span className="text-[10px] text-subtle">Sem logo</span>
+              <span className="text-[10px] text-subtle">Sem logótipo</span>
             )}
           </div>
           {!somenteLeitura && (

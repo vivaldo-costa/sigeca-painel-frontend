@@ -64,3 +64,47 @@ export function extrairUnidadeExistente(err: unknown): UnidadeSeccao | null {
   const detalhes = err.response?.data?.detalhes as { unidade_existente?: UnidadeSeccao } | undefined
   return detalhes?.unidade_existente ?? null
 }
+
+export interface MembroUnidadeSeccao {
+  id: number
+  nome: string
+  codigo_associado: string
+  estado: string
+  seccao_nome: string | null
+  agrupamento_nome: string | null
+  ab_agrupamento: string | null
+}
+
+/** Membros de um Bando/Patrulha/Equipa (só os da área do perfil). */
+export function useMembrosUnidadeSeccao(id: number | null) {
+  return useQuery({
+    queryKey: ['unidades-seccao-membros', id],
+    queryFn: async () => (await api.get<{ dados: MembroUnidadeSeccao[] }>(`/unidades-seccao/${id}/membros`)).data.dados,
+    enabled: id !== null,
+  })
+}
+
+export function useAdicionarMembrosUnidade() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, utilizadorIds }: { id: number; utilizadorIds: number[] }) =>
+      (await api.post<{ mensagem: string }>(`/unidades-seccao/${id}/membros`, { utilizador_ids: utilizadorIds })).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['unidades-seccao-membros'] })
+      queryClient.invalidateQueries({ queryKey: ['unidades-seccao'] })
+      queryClient.invalidateQueries({ queryKey: ['painel-utilizadores'] })
+    },
+  })
+}
+
+export function useRetirarMembroUnidade() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, utilizadorId }: { id: number; utilizadorId: number }) =>
+      (await api.delete(`/unidades-seccao/${id}/membros/${utilizadorId}`)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['unidades-seccao-membros'] })
+      queryClient.invalidateQueries({ queryKey: ['unidades-seccao'] })
+    },
+  })
+}

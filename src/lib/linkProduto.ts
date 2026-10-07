@@ -16,8 +16,8 @@ export async function copiarLinkProduto(produtoId: number) {
   const link = linkExternoProduto(produtoId)
   try {
     await navigator.clipboard.writeText(link)
-    notificar.sucesso('Link do produto copiado — já pode colar nas redes sociais.')
+    notificar.sucesso('Link do produto copiado — já podes colar nas redes sociais.')
   } catch {
-    window.prompt('Copie o link do produto:', link)
+    window.prompt('Copia o link do produto:', link)
   }
 }

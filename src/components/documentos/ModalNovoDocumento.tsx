@@ -95,7 +95,7 @@ export function ModalNovoDocumento({ onClose }: { onClose: () => void }) {
                 )}
 
                 <Campo label="Entidade Empregadora / Instituição">
-                  <TextField required value={entidade} onChange={(e) => setEntidade(e.target.value)} placeholder="Ex: Escola Secundária de..." />
+                  <TextField required value={entidade} onChange={(e) => setEntidade(e.target.value)} placeholder="Ex.: Escola Secundária de..." />
                 </Campo>
 
 

@@ -56,7 +56,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const detalhes = (err as { response?: { data?: { detalhes?: { captchaExigido?: boolean; proximoExigeCaptcha?: boolean } } } })?.response?.data?.detalhes
       set({
         status: 'guest',
-        error: getApiErrorMessage(err, 'Número SIGECA/email ou palavra-passe inválidos.'),
+        error: getApiErrorMessage(err, 'Número SIGECA/e-mail ou palavra-passe inválidos.'),
         captchaExigido: !!(detalhes?.captchaExigido || detalhes?.proximoExigeCaptcha),
       })
       return false

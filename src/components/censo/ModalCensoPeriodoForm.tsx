@@ -29,7 +29,7 @@ export function ModalCensoPeriodoForm({ onClose }: { onClose: () => void }) {
           <button onClick={onClose} className="text-subtle transition hover:text-text"><X className="size-5" /></button>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-6 py-5">
-          <Campo label="Título"><TextField required value={form.titulo} onChange={(e) => setForm((f) => ({ ...f, titulo: e.target.value }))} placeholder="Ex: Censo 2026" /></Campo>
+          <Campo label="Título"><TextField required value={form.titulo} onChange={(e) => setForm((f) => ({ ...f, titulo: e.target.value }))} placeholder="Ex.: Censo 2026" /></Campo>
           <Linha2>
             <Campo label="Início"><TextField type="date" required value={form.data_inicio} onChange={(e) => setForm((f) => ({ ...f, data_inicio: e.target.value }))} /></Campo>
             <Campo label="Fim"><TextField type="date" required value={form.data_fim} onChange={(e) => setForm((f) => ({ ...f, data_fim: e.target.value }))} /></Campo>

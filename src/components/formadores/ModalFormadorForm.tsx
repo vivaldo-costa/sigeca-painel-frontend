@@ -29,7 +29,7 @@ export function ModalFormadorForm({ formador, onClose }: Props) {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    if (!utilizadorEscolhido) { notificar.erro('Escolhe o utilizador a cadastrar como formador.'); return }
+    if (!utilizadorEscolhido) { notificar.erro('Escolhe o utilizador a registar como formador.'); return }
     try {
       if (formador) await atualizar.mutateAsync({ id: formador.id, payload: form })
       else await cadastrar.mutateAsync({ ...form, utilizador_id: utilizadorEscolhido.id })
@@ -43,7 +43,7 @@ export function ModalFormadorForm({ formador, onClose }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-fade-in" onClick={onClose}>
       <div className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-2xl bg-white shadow-xl animate-scale-in" onClick={(e) => e.stopPropagation()}>
         <div className="flex shrink-0 items-center justify-between border-b border-border px-6 py-4">
-          <h2 className="text-lg font-bold text-text">{formador ? 'Editar Formador' : 'Cadastrar Formador'}</h2>
+          <h2 className="text-lg font-bold text-text">{formador ? 'Editar Formador' : 'Registar Formador'}</h2>
           <button onClick={onClose} className="text-subtle transition hover:text-text"><X className="size-5" /></button>
         </div>
 
@@ -80,7 +80,7 @@ export function ModalFormadorForm({ formador, onClose }: Props) {
             </Campo>
           )}
 
-          <Campo label="Especialidades"><TextField value={form.especialidades} onChange={(e) => setForm((f) => ({ ...f, especialidades: e.target.value }))} placeholder="Ex: Pioneirismo, Primeiros Socorros" /></Campo>
+          <Campo label="Especialidades"><TextField value={form.especialidades} onChange={(e) => setForm((f) => ({ ...f, especialidades: e.target.value }))} placeholder="Ex.: Pioneirismo, Primeiros Socorros" /></Campo>
           <Campo label="Certificações"><TextField value={form.certificacoes} onChange={(e) => setForm((f) => ({ ...f, certificacoes: e.target.value }))} /></Campo>
           <Campo label="Biografia">
             <textarea

@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
-import { Users, Pencil, Trash2, Loader2, Check, X } from 'lucide-react'
+import { Users, Pencil, Trash2, Loader2, Check, X, Plus, UserRound } from 'lucide-react'
+import { ModalNovaUnidade, ModalMembrosUnidade } from '@/components/unidadesSeccao/ModaisUnidadeSeccao'
+import { usePermissao } from '@/hooks/usePermissao'
 import {
   useUnidadesSeccao, useRenomearUnidadeSeccao, useEliminarUnidadeSeccao,
 } from '@/hooks/useUnidadesSeccao'
@@ -39,6 +41,9 @@ export function UnidadesSeccaoLista() {
   const [filtroNome, setFiltroNome] = useState('')
   const [aEditar, setAEditar] = useState<UnidadeSeccao | null>(null)
   const [novoNome, setNovoNome] = useState('')
+  const [criarAberto, setCriarAberto] = useState(false)
+  const [membrosDe, setMembrosDe] = useState<UnidadeSeccao | null>(null)
+  const { criar: podeCriar } = usePermissao('Escuteiros')
 
   const filtrados = useMemo(() => {
     const termo = filtroNome.trim().toLowerCase()
@@ -84,14 +89,21 @@ export function UnidadesSeccaoLista() {
 
   return (
     <div className="mx-auto max-w-[1100px] px-6 py-7">
-      <div className="mb-5">
-        <h1 className="flex items-center gap-2.5 text-xl font-bold text-text">
-          <Users className="size-5 text-muted" /> Bandos, Patrulhas e Equipas
-        </h1>
-        <p className="mt-1 text-[13px] text-muted">
-          Catálogo global partilhado por todos os Agrupamentos — cada nome só existe uma vez por tipo.
-          {!ehAdmin && ' Só o Administrador pode renomear ou eliminar entradas.'}
-        </p>
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="flex items-center gap-2.5 text-xl font-bold text-text">
+            <Users className="size-5 text-muted" /> Bandos, Patrulhas e Equipas
+          </h1>
+          <p className="mt-1 text-[13px] text-muted">
+            Bando para os Lobitos, Patrulha para os Exploradores e Equipa para os Caminheiros. O nome é partilhado por todos os agrupamentos; os membros são de cada agrupamento.
+            {!ehAdmin && ' Só o Administrador pode mudar o nome ou eliminar.'}
+          </p>
+        </div>
+        {podeCriar && (
+          <button onClick={() => setCriarAberto(true)} className="flex items-center gap-1.5 rounded-lg bg-[#111827] px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-black">
+            <Plus className="size-3.5" /> Novo
+          </button>
+        )}
       </div>
 
       <Card className="mb-5 flex flex-wrap items-center gap-3 p-4">
@@ -133,20 +145,20 @@ export function UnidadesSeccaoLista() {
               <th className="px-3.5 py-2.5 font-medium">Agrupamento criador</th>
               <th className="px-3.5 py-2.5 font-medium">Nº de membros</th>
               <th className="px-3.5 py-2.5 font-medium">Criado em</th>
-              {ehAdmin && <th className="px-3.5 py-2.5 text-center font-medium">Acções</th>}
+              <th className="px-3.5 py-2.5 text-center font-medium">Acções</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {isLoading && (
               <tr>
-                <td colSpan={ehAdmin ? 6 : 5} className="py-12 text-center text-subtle">
+                <td colSpan={6} className="py-12 text-center text-subtle">
                   <Loader2 className="mx-auto size-5 animate-spin" />
                 </td>
               </tr>
             )}
             {!isLoading && filtrados.length === 0 && (
               <tr>
-                <td colSpan={ehAdmin ? 6 : 5} className="py-12 text-center text-subtle">Nenhum registo encontrado.</td>
+                <td colSpan={6} className="py-12 text-center text-subtle">Nenhum registo encontrado.</td>
               </tr>
             )}
             {!isLoading &&
@@ -184,10 +196,13 @@ export function UnidadesSeccaoLista() {
                     <td className="whitespace-nowrap px-3.5 py-2.5 text-muted">
                       {new Date(u.created_at).toLocaleDateString('pt-PT')}
                     </td>
-                    {ehAdmin && (
-                      <td className="px-3.5 py-2.5">
+                    <td className="px-3.5 py-2.5">
                         <div className="flex items-center justify-center gap-2">
-                          {emEdicao ? (
+                          <button onClick={() => setMembrosDe(u)} title="Membros"
+                            className="flex h-7 items-center gap-1 rounded-lg border border-border px-2 text-[11.5px] font-medium text-text hover:bg-bg">
+                            <UserRound className="size-3.5" /> Membros
+                          </button>
+                          {!ehAdmin ? null : emEdicao ? (
                             <>
                               <button
                                 onClick={guardarEdicao}
@@ -222,13 +237,15 @@ export function UnidadesSeccaoLista() {
                           )}
                         </div>
                       </td>
-                    )}
                   </tr>
                 )
               })}
           </tbody>
         </table>
       </Card>
+
+      {criarAberto && <ModalNovaUnidade onClose={() => setCriarAberto(false)} onCriada={(u) => { setCriarAberto(false); setMembrosDe(u) }} />}
+      {membrosDe && <ModalMembrosUnidade unidade={membrosDe} onClose={() => setMembrosDe(null)} />}
     </div>
   )
 }

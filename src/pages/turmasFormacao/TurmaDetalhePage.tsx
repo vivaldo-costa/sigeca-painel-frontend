@@ -244,7 +244,7 @@ export function TurmaDetalhePage() {
       {podeSubmeter && (
         <Card className="mb-4 p-4">
           <p className="mb-3 text-[12.5px] text-muted">
-            Quando a turma tiver local, datas, o mínimo de participantes, um coordenador, e os documentos do Programa da Formação e Nota de Pagamento, pode ser submetida ao Secretariado Nacional.
+            Quando a turma tiver local, datas, o mínimo de participantes, um coordenador e os documentos do Programa da Formação e Nota de Pagamento, pode ser submetida ao Secretariado Nacional.
           </p>
           <button
             onClick={handleSubmeter}
@@ -315,7 +315,7 @@ export function TurmaDetalhePage() {
             type="number" min="0"
             value={concluintes}
             onChange={(e) => setConcluintes(e.target.value)}
-            placeholder={`Participantes concluintes (padrão: ${turma.participantes.length})`}
+            placeholder={`Participantes concluintes (por omissão: ${turma.participantes.length})`}
             className="mb-2 w-full rounded-lg border border-border px-3 py-2 text-[12.5px] outline-none focus:border-[#111827]"
           />
           <textarea
@@ -349,7 +349,7 @@ export function TurmaDetalhePage() {
       {turma.estado === 'realizada' && podeEditar && (
         <Card className="mb-4 p-4">
           <p className="mb-3 text-[12.5px] text-muted">
-            Para encerrar, anexa nos Documentos acima: a(s) Lista(s) de Presença, a Ficha de Avaliação Geral, e a Avaliação dos Formadores.
+            Para encerrar, anexa nos Documentos acima: a(s) Lista(s) de Presença, a Ficha de Avaliação Geral e a Avaliação dos Formadores.
           </p>
           <button onClick={handleEncerrar} disabled={encerrarTurma.isPending} className="flex items-center gap-1.5 rounded-lg bg-[#111827] px-3.5 py-2 text-[12.5px] font-semibold text-white disabled:opacity-50">
             {encerrarTurma.isPending ? <Loader2 className="size-4 animate-spin" /> : <Lock className="size-3.5" />}

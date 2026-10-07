@@ -6,9 +6,9 @@ export type AccaoAuditoria =
   | 'importacao' | 'restauracao'
 
 export const LABEL_ACCAO: Record<AccaoAuditoria, string> = {
-  login: 'Login',
+  login: 'Início de sessão',
   logout: 'Logout',
-  login_falhado: 'Login Falhado',
+  login_falhado: 'Início de sessão falhado',
   criacao: 'Criação',
   edicao: 'Edição',
   eliminacao: 'Eliminação',

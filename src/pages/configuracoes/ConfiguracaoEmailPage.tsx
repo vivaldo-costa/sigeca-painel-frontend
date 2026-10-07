@@ -73,7 +73,7 @@ export function ConfiguracaoEmailPage() {
 
           <Linha2>
             <Campo label="Utilizador"><TextField value={form.utilizador ?? ''} onChange={(e) => setForm((f) => ({ ...f, utilizador: e.target.value }))} /></Campo>
-            <Campo label={data.tem_password ? 'Password (preenchida — só muda se escreveres uma nova)' : 'Password'}>
+            <Campo label={data.tem_password ? 'Palavra-passe (preenchida — só muda se escreveres uma nova)' : 'Palavra-passe'}>
               <TextField type="password" value={novaPassword} onChange={(e) => setNovaPassword(e.target.value)} placeholder={data.tem_password ? '••••••••' : ''} />
             </Campo>
           </Linha2>

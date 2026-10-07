@@ -47,7 +47,7 @@ export function ModalNovoModelo({ onClose }: { onClose: () => void }) {
 
         <form onSubmit={handleSubmit} className="space-y-4 px-6 py-5">
           <Campo label="Título">
-            <TextField required value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Ex: Programa / Plano de Acção 2027" />
+            <TextField required value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Ex.: Programa / Plano de Acção 2027" />
           </Campo>
           <Campo label="Categoria">
             <SelectField value={categoria} onChange={(e) => setCategoria(e.target.value)}>

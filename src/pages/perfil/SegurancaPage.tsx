@@ -99,7 +99,7 @@ export function SegurancaPage() {
             </button>
           ) : (
             <form onSubmit={handleDesactivar} className="flex flex-col gap-2">
-              <label className="text-[12px] text-muted">Confirma a tua password para desactivar:</label>
+              <label className="text-[12px] text-muted">Confirma a tua palavra-passe para desactivar:</label>
               <input
                 type="password" value={passwordDesactivar} onChange={(e) => setPasswordDesactivar(e.target.value)}
                 className="h-9 rounded-lg border border-border px-3 text-[12.5px] outline-none focus:border-[#111827]"
@@ -118,7 +118,7 @@ export function SegurancaPage() {
         <Card className="p-4">
           <p className="mb-1 text-[13px] font-semibold text-text">Autenticação de dois factores</p>
           <p className="mb-4 text-[12.5px] text-muted">
-            Acrescenta uma camada extra de segurança — além da password, vais precisar de um código gerado por uma
+            Acrescenta uma camada extra de segurança — além da palavra-passe, vais precisar de um código gerado por uma
             app de autenticação (Google Authenticator, Authy, etc.) para entrar.
           </p>
           <button onClick={handleIniciar} disabled={iniciar.isPending} className="flex items-center gap-1.5 rounded-lg bg-[#111827] px-4 py-2.5 text-[13px] font-semibold text-white disabled:opacity-50">

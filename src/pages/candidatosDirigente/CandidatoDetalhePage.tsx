@@ -83,7 +83,7 @@ export function CandidatoDetalhePage() {
   }
 
   async function handleRegistarPromessa() {
-    if (!dataPromessa || !localPromessa || !responsavel) { notificar.erro('Preenche a data, o local, e o responsável.'); return }
+    if (!dataPromessa || !localPromessa || !responsavel) { notificar.erro('Preenche a data, o local e o responsável.'); return }
     try {
       await registarPromessa.mutateAsync({ data_promessa: dataPromessa, local: localPromessa, responsavel_id: responsavel.id })
     } catch (err) {
@@ -245,7 +245,7 @@ export function CandidatoDetalhePage() {
       {candidato.estado === 'devolvido_correcao' && (
         <Card className="mb-4 p-4">
           <p className="mb-3 text-[12.5px] text-muted">
-            Candidatura devolvida para correcção. Depois de corrigir o que faltava, resubmete para voltar à mesma etapa.
+            Candidatura devolvida para correcção. Depois de corrigir o que faltava, ressubmete para voltar à mesma etapa.
           </p>
           <button
             onClick={() => resubmeter.mutate()}

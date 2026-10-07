@@ -2,7 +2,7 @@ import { Campo, Linha2, TextField, SelectField, TextareaField } from '@/componen
 import { Accordion } from '@/components/ui/Accordion'
 import type { CamposAdicionaisUtilizadorValores } from '@/types/utilizador'
 
-const SACRAMENTOS_DISPONIVEIS = ['Baptismo', 'Comunhão', 'Crisma', 'Matrimônio', 'Ordem', 'Consagrada']
+const SACRAMENTOS_DISPONIVEIS = ['Baptismo', 'Comunhão', 'Crisma', 'Matrimónio', 'Ordem', 'Consagrada']
 const GRUPOS_SANGUINEOS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
 
 interface SeccaoProps {

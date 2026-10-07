@@ -34,7 +34,7 @@ export function RecuperarPage() {
           <img src={logo} alt="SIGECA" className="mb-4 h-9" />
           <h1 className="text-lg font-bold text-text">Recuperar acesso</h1>
           <p className="mt-1 text-[13px] text-muted">
-            Indica o teu número SIGECA ou e-mail — se existir uma conta, vais receber um link para definires uma nova password.
+            Indica o teu número SIGECA ou e-mail — se existir uma conta, vais receber um link para definires uma nova palavra-passe.
           </p>
         </div>
 
@@ -60,7 +60,7 @@ export function RecuperarPage() {
         )}
 
         <Link to="/login" className="mt-6 flex items-center justify-center gap-1.5 text-[12.5px] font-medium text-muted underline underline-offset-2">
-          <ArrowLeft className="size-3.5" /> Voltar ao login
+          <ArrowLeft className="size-3.5" /> Voltar ao início de sessão
         </Link>
       </div>
     </div>

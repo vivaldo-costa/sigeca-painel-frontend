@@ -15,7 +15,7 @@ export function AcoesRapidasCard() {
     <Card>
       <CardHeader className="flex items-center gap-2">
         <Zap className="size-4 text-muted" />
-        <h3 className="text-[13.5px] font-semibold text-text">Ações Rápidas</h3>
+        <h3 className="text-[13.5px] font-semibold text-text">Acções Rápidas</h3>
       </CardHeader>
       <CardBody className="space-y-1.5">
         {ACOES.map((a) => (

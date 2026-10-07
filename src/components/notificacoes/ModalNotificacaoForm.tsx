@@ -99,7 +99,7 @@ export function ModalNotificacaoForm({ notificacao, onClose }: Props) {
                 required
                 value={form.utilizador_id}
                 onChange={(e) => setForm((f) => ({ ...f, utilizador_id: Number(e.target.value) || '' }))}
-                placeholder="Ex: 1024"
+                placeholder="Ex.: 1024"
               />
             </Campo>
           )}

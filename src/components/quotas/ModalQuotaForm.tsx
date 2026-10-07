@@ -52,7 +52,7 @@ export function ModalQuotaForm({ quota, onClose }: Props) {
 
           {!quota && (
             <Campo label="Nº SIGECA do escuteiro">
-              <TextField required value={form.codigo_associado} onChange={(e) => setForm((f) => ({ ...f, codigo_associado: e.target.value }))} placeholder="Ex: CA00056000001" />
+              <TextField required value={form.codigo_associado} onChange={(e) => setForm((f) => ({ ...f, codigo_associado: e.target.value }))} placeholder="Ex.: CA00056000001" />
             </Campo>
           )}
           {quota && (

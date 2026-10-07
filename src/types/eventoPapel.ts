@@ -19,7 +19,7 @@ export const PAPEIS_EVENTO: { valor: PapelEvento; label: string }[] = [
   { valor: 'administrador_nacional', label: 'Administrador Nacional' },
   { valor: 'coordenacao_nacional', label: 'Coordenação Nacional' },
   { valor: 'coordenacao_diocesana', label: 'Coordenação Diocesana' },
-  { valor: 'coordenacao_vigarial', label: 'Coordenação Vigarial' },
+  { valor: 'coordenacao_vigarial', label: 'Coordenação Vicarial' },
   { valor: 'chefe_agrupamento', label: 'Chefe de Agrupamento' },
   { valor: 'director_acampamento', label: 'Director do Acampamento' },
   { valor: 'coordenador_comissao', label: 'Coordenador de Comissão' },

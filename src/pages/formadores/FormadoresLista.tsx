@@ -50,7 +50,7 @@ export function FormadoresLista() {
           />
           {podeCriar && (
             <button onClick={() => setModalForm('novo')} className="flex items-center gap-1.5 rounded-lg bg-[#111827] px-3.5 py-2 text-[13px] font-semibold text-white transition hover:bg-black">
-              <Plus className="size-3.5" /> Cadastrar Formador
+              <Plus className="size-3.5" /> Registar Formador
             </button>
           )}
         </div>

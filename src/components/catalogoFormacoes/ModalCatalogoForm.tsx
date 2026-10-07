@@ -43,7 +43,7 @@ function MateriaisFormacao({ catalogoId }: { catalogoId: number }) {
   return (
     <div className="border-t border-border pt-4">
       <label className="mb-2 flex items-center gap-1.5 text-[13px] font-medium text-muted">
-        <FileDown className="size-3.5" /> Materiais de apoio (downloads)
+        <FileDown className="size-3.5" /> Materiais de apoio (para descarregar)
       </label>
 
       {materiais && materiais.length > 0 && (

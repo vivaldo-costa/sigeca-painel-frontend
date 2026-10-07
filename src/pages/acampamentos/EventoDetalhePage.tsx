@@ -33,7 +33,7 @@ const ABAS = [
   { chave: 'paineis-oficinas', label: 'Painéis e Oficinas' },
   { chave: 'documentos', label: 'Documentos' },
   { chave: 'credenciais', label: 'Credenciais' },
-  { chave: 'scan-qr', label: 'Scan QR' },
+  { chave: 'scan-qr', label: 'Digitalizar QR' },
   { chave: 'saude', label: 'Saúde Operacional' },
   { chave: 'indicadores', label: 'Indicadores' },
 ] as const

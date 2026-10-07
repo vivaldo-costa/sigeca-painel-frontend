@@ -25,7 +25,7 @@ export const TIPOS_LOGO: { chave: 'logo_principal' | 'logo_cabecalho' | 'logo_pd
   { chave: 'logo_principal', label: 'Logo Principal' },
   { chave: 'logo_cabecalho', label: 'Logo do Cabeçalho' },
   { chave: 'logo_pdf', label: 'Logo para PDF' },
-  { chave: 'logo_login', label: 'Logo do Login' },
+  { chave: 'logo_login', label: 'Logótipo da página de entrada' },
   { chave: 'favicon', label: 'Favicon' },
   { chave: 'logo_mobile', label: 'Logo Mobile' },
   { chave: 'simbolo', label: 'Símbolo / Reduzido' },

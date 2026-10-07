@@ -21,7 +21,7 @@ export function RedefinirPasswordPage() {
     e.preventDefault()
     setErro(null)
     if (novaSenha !== confirmar) {
-      setErro('As duas passwords têm de ser iguais.')
+      setErro('As duas palavras-passe têm de ser iguais.')
       return
     }
     setEnviando(true)
@@ -29,7 +29,7 @@ export function RedefinirPasswordPage() {
       await api.post('/auth/redefinir-password', { token, novaSenha })
       navigate('/login?redefinida=1', { replace: true })
     } catch (err) {
-      setErro(getApiErrorMessage(err, 'Não foi possível redefinir a password.'))
+      setErro(getApiErrorMessage(err, 'Não foi possível redefinir a palavra-passe.'))
     } finally {
       setEnviando(false)
     }
@@ -40,7 +40,7 @@ export function RedefinirPasswordPage() {
       <div className="w-full max-w-[400px] rounded-2xl border border-border bg-surface p-8 shadow-[var(--shadow-pn)]">
         <div className="mb-6 flex flex-col items-center text-center">
           <img src={logo} alt="SIGECA" className="mb-4 h-9" />
-          <h1 className="text-lg font-bold text-text">Definir nova password</h1>
+          <h1 className="text-lg font-bold text-text">Definir nova palavra-passe</h1>
         </div>
 
         {!token ? (
@@ -56,7 +56,7 @@ export function RedefinirPasswordPage() {
             <Input
               id="novaSenha"
               type="password"
-              label="Nova password"
+              label="Nova palavra-passe"
               icon={<Lock className="size-4" />}
               placeholder="••••••••"
               autoComplete="new-password"
@@ -67,7 +67,7 @@ export function RedefinirPasswordPage() {
             <Input
               id="confirmar"
               type="password"
-              label="Confirmar password"
+              label="Confirmar palavra-passe"
               icon={<Lock className="size-4" />}
               placeholder="••••••••"
               autoComplete="new-password"
@@ -76,7 +76,7 @@ export function RedefinirPasswordPage() {
               onChange={(e) => setConfirmar(e.target.value)}
             />
             <Button type="submit" size="lg" className="mt-2 w-full" loading={enviando}>
-              Redefinir password
+              Redefinir palavra-passe
             </Button>
           </form>
         )}

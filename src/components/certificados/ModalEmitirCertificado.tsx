@@ -94,7 +94,7 @@ export function ModalEmitirCertificado({ onClose }: Props) {
               required
               value={form.titulo}
               onChange={(e) => setForm((f) => ({ ...f, titulo: e.target.value }))}
-              placeholder="Ex: Declaração de Participação no Curso PIF 2026"
+              placeholder="Ex.: Declaração de Participação no Curso PIF 2026"
             />
           </Campo>
 

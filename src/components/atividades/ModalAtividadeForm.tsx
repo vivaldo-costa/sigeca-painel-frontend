@@ -188,7 +188,7 @@ export function ModalAtividadeForm({ hooks, atividade, tituloModulo, onClose }: 
           <CampoAbrangencia abrangencia={form.abrangencia} diocesesIds={form.dioceses_ids}
             onChange={(v) => setForm((f) => ({ ...f, ...v }))} />
 
-          <Campo label="Local"><TextField value={form.local} onChange={(e) => setForm((f) => ({ ...f, local: e.target.value }))} placeholder="Ex: Luanda" /></Campo>
+          <Campo label="Local"><TextField value={form.local} onChange={(e) => setForm((f) => ({ ...f, local: e.target.value }))} placeholder="Ex.: Luanda" /></Campo>
 
           <Linha2>
             <Campo label="Acesso">

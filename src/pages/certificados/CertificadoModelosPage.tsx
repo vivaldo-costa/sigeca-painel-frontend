@@ -158,7 +158,7 @@ export function CertificadoModelosPage() {
               <CardHeader><h3 className="text-[13.5px] font-semibold text-text">Textos</h3></CardHeader>
               <CardBody className="space-y-4">
                 <p className="rounded-lg bg-bg px-3 py-2 text-[11.5px] text-muted">
-                  Marcadores que pode usar: {MARCADORES.map((m) => <code key={m} className="mx-0.5 rounded bg-white px-1 font-mono">{m}</code>)}
+                  Marcadores que podes usar: {MARCADORES.map((m) => <code key={m} className="mx-0.5 rounded bg-white px-1 font-mono">{m}</code>)}
                 </p>
                 <Campo label="Cabeçalho"><TextField required value={form.cabecalho} onChange={(e) => alterar('cabecalho', e.target.value)} /></Campo>
                 <Campo label="Subcabeçalho"><TextField value={form.subcabecalho ?? ''} onChange={(e) => alterar('subcabecalho', e.target.value)} /></Campo>

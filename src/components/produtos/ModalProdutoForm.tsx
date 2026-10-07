@@ -233,7 +233,7 @@ export function ModalProdutoForm({ produto, onClose }: Props) {
             </Campo>
           </Linha2>
           <Linha2>
-            <Campo label="Etiqueta (ex: Novo, Promoção)"><TextField value={form.etiqueta} onChange={(e) => setForm((f) => ({ ...f, etiqueta: e.target.value }))} /></Campo>
+            <Campo label="Etiqueta (ex.: Novo, Promoção)"><TextField value={form.etiqueta} onChange={(e) => setForm((f) => ({ ...f, etiqueta: e.target.value }))} /></Campo>
             <Campo label="Estado">
               <SelectField value={form.ativo ? '1' : '0'} onChange={(e) => setForm((f) => ({ ...f, ativo: e.target.value === '1' }))}>
                 <option value="1">Activo</option>

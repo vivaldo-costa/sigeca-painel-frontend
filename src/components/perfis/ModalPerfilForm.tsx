@@ -58,7 +58,7 @@ export function ModalPerfilForm({ perfil, onClose }: Props) {
               maxLength={50}
               value={nome}
               onChange={(e) => setNome(e.target.value.toUpperCase().replace(/\s+/g, '_'))}
-              placeholder="Ex: GESTOR"
+              placeholder="Ex.: GESTOR"
               className="w-full rounded-xl border border-border px-4 py-2.5 text-sm uppercase outline-none focus:ring-2 focus:ring-[#111827]/30"
             />
             <p className="mt-1 text-xs text-subtle">{sistema ? 'Perfil de sistema — só a visibilidade pode ser alterada.' : 'Só letras maiúsculas e _ (ex.: SECRETARIO_DIOCESANO).'}</p>

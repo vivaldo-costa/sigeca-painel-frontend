@@ -75,7 +75,7 @@ export function BackupsPage() {
 
       <Card className="mb-4 p-4">
         <p className="mb-1 text-[12.5px] font-semibold text-muted">Criar Backup</p>
-        <p className="mb-3 text-[12px] text-subtle">Gera uma cópia completa da base de dados (estrutura e dados) e disponibiliza-a aqui para download.</p>
+        <p className="mb-3 text-[12px] text-subtle">Gera uma cópia completa da base de dados (estrutura e dados) e disponibiliza-a aqui para descarregar.</p>
         <button onClick={handleCriarBackup} disabled={criar.isPending} className="flex items-center gap-1.5 rounded-lg bg-[#111827] px-4 py-2.5 text-[13px] font-semibold text-white disabled:opacity-50">
           {criar.isPending ? <Loader2 className="size-4 animate-spin" /> : <PlusCircle className="size-3.5" />}
           {criar.isPending ? 'A criar backup (pode demorar alguns minutos)...' : 'Criar Backup Agora'}

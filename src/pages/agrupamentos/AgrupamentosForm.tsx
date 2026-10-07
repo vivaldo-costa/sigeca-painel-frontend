@@ -95,7 +95,7 @@ export function AgrupamentosForm() {
       </Linha2>
 
       <Linha2>
-        <Campo label="N° do Agrupamento">
+        <Campo label="Nº do Agrupamento">
           <TextField required minLength={5} maxLength={5} pattern=".{5}" title="Deve ter exactamente 5 caracteres (ex.: 00001)" {...campo('ab_agrupamento')} />
         </Campo>
         <Campo label="Data de Fundação"><TextField type="date" {...campo('data_fundacao')} /></Campo>

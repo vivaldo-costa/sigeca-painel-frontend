@@ -52,7 +52,7 @@ export function ModalRetorno({ pedidoId, tipoInicial = 'devolucao', onClose }: P
         const nova = variantesPorProduto.get(i.produto_id)?.find((v) => v.variacao_id === novas[i.id])
         if (!nova) { notificar.aviso(`Escolhe o novo tamanho/variante de "${i.produto_nome}".`); return }
         if (nova.variacao_id !== i.variacao_id && nova.stock_disponivel < quantidades[i.id]) {
-          notificar.erro('Não existe stock disponível para o tamanho selecionado.')
+          notificar.erro('Não existe stock disponível para o tamanho seleccionado.')
           return
         }
       }
@@ -103,7 +103,7 @@ export function ModalRetorno({ pedidoId, tipoInicial = 'devolucao', onClose }: P
 
             {!venda.pode_devolver ? (
               <p className="rounded-lg bg-badge-orange-bg px-3 py-2 text-[12.5px] text-badge-orange-text">
-                Só se pode devolver/trocar artigos de vendas concluídas ou encomendas já levantadas/enviadas.
+                Só se podem devolver/trocar artigos de vendas concluídas ou encomendas já levantadas/enviadas.
               </p>
             ) : (
               <>
@@ -162,7 +162,7 @@ export function ModalRetorno({ pedidoId, tipoInicial = 'devolucao', onClose }: P
                               </SelectField>
                             </Campo>
                             {nova && nova.variacao_id !== i.variacao_id && nova.stock_disponivel < q && (
-                              <p className="mt-1 text-[11.5px] font-medium text-badge-red-text">Não existe stock disponível para o tamanho selecionado.</p>
+                              <p className="mt-1 text-[11.5px] font-medium text-badge-red-text">Não existe stock disponível para o tamanho seleccionado.</p>
                             )}
                           </div>
                         )}
