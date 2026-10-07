@@ -2,9 +2,13 @@ import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { uploadUrl } from '@/lib/uploads'
 import { formatarAgrupamento } from '@/lib/formatadores'
+import { PaginacaoLista, usePaginacao } from '@/components/ui/PaginacaoLista'
 import type { UltimoUtilizador } from '@/types/dashboard'
 
+const POR_PAGINA = 8
+
 export function UltimosRegistosCard({ utilizadores }: { utilizadores: UltimoUtilizador[] }) {
+  const pag = usePaginacao(utilizadores, POR_PAGINA)
   return (
     <Card>
       <CardHeader className="flex items-center justify-between gap-2">
@@ -24,8 +28,10 @@ export function UltimosRegistosCard({ utilizadores }: { utilizadores: UltimoUtil
         {utilizadores.length === 0 ? (
           <p className="py-6 text-center text-[13px] text-subtle">Sem registos recentes.</p>
         ) : (
-          utilizadores.map((u, i) => (
-            <div key={i} className="flex animate-fade-in items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-bg" style={{ animationDelay: `${i * 40}ms` }}>
+          <>
+          <div className="grid grid-cols-1 gap-x-6 gap-y-1 md:grid-cols-2">
+          {pag.visiveis.map((u, i) => (
+            <div key={pag.inicio + i} className="flex animate-fade-in items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-bg" style={{ animationDelay: `${i * 40}ms` }}>
               <div className="grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-bg text-[11px] font-semibold text-muted">
                 {u.foto ? (
                   <img src={uploadUrl('avatar', u.foto)!} className="size-full object-cover" alt={u.nome} />
@@ -41,7 +47,10 @@ export function UltimosRegistosCard({ utilizadores }: { utilizadores: UltimoUtil
               </div>
               <span className="shrink-0 font-mono text-[10.5px] text-subtle">{u.codigo_associado}</span>
             </div>
-          ))
+          ))}
+          </div>
+          <PaginacaoLista {...pag} porPagina={POR_PAGINA} onMudar={pag.setPagina} className="mt-2" />
+          </>
         )}
       </CardBody>
     </Card>

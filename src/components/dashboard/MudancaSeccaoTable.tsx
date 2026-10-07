@@ -1,9 +1,13 @@
 import { ArrowRight } from 'lucide-react'
 import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
+import { PaginacaoLista, usePaginacao } from '@/components/ui/PaginacaoLista'
 import type { MudancaSeccao } from '@/types/dashboard'
 
+const POR_PAGINA = 10
+
 export function MudancaSeccaoTable({ dados }: { dados: MudancaSeccao[] }) {
+  const pag = usePaginacao(dados, POR_PAGINA)
   return (
     <Card>
       <CardHeader className="flex items-start justify-between gap-2">
@@ -26,9 +30,9 @@ export function MudancaSeccaoTable({ dados }: { dados: MudancaSeccao[] }) {
         {dados.length === 0 ? (
           <p className="px-5 py-8 text-center text-[13px] text-subtle">Sem sugestões no momento.</p>
         ) : (
-          <div className="max-h-[340px] overflow-y-auto">
+          <div>
             <table className="w-full text-left text-[12.5px]">
-              <thead className="sticky top-0 bg-bg text-[10.5px] uppercase tracking-wide text-muted">
+              <thead className="bg-bg text-[10.5px] uppercase tracking-wide text-muted">
                 <tr>
                   <th className="px-5 py-2 font-medium">Escuteiro</th>
                   <th className="px-3 py-2 font-medium">Idade</th>
@@ -37,7 +41,7 @@ export function MudancaSeccaoTable({ dados }: { dados: MudancaSeccao[] }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {dados.map((d, i) => (
+                {pag.visiveis.map((d, i) => (
                   <tr key={i} className="hover:bg-bg">
                     <td className="px-5 py-2.5">
                       <p className="font-medium text-text">{d.nome}</p>
@@ -55,6 +59,7 @@ export function MudancaSeccaoTable({ dados }: { dados: MudancaSeccao[] }) {
                 ))}
               </tbody>
             </table>
+            <PaginacaoLista {...pag} porPagina={POR_PAGINA} onMudar={pag.setPagina} className="mx-5 mb-3" />
           </div>
         )}
       </CardBody>

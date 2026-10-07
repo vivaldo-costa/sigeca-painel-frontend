@@ -15,9 +15,7 @@ import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
 import { UltimasAtividadesCard } from '@/components/dashboard/UltimasAtividadesCard'
 import { UltimosRegistosCard } from '@/components/dashboard/UltimosRegistosCard'
 import { AcoesRapidasCard } from '@/components/dashboard/AcoesRapidasCard'
-import { MiniCalendarioCard } from '@/components/dashboard/MiniCalendarioCard'
 import { UltimasDeclaracoesCard } from '@/components/dashboard/UltimasDeclaracoesCard'
-import { DashboardFooterBanner } from '@/components/dashboard/DashboardFooterBanner'
 import { VigarariasAgrupamentosCard, ParoquiasCard } from '@/components/dashboard/ListasEstrutura'
 import { AtividadesFormacoesVotacoesCard } from '@/components/dashboard/AtividadesFormacoesVotacoesCard'
 import { MudancaSeccaoTable } from '@/components/dashboard/MudancaSeccaoTable'
@@ -113,16 +111,12 @@ export function DashboardPage() {
             </div>
             <div className="space-y-4">
               <AcoesRapidasCard />
-              <MiniCalendarioCard />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-              <UltimosRegistosCard utilizadores={data.ultimos_utilizadores} />
-            </div>
-            <VigarariasAgrupamentosCard vigararias={data.vigararias} agrupamentos={data.agrupamentos} />
-          </div>
+          <UltimosRegistosCard utilizadores={data.ultimos_utilizadores} />
+
+          <VigarariasAgrupamentosCard vigararias={data.vigararias} agrupamentos={data.agrupamentos} />
 
           <ParoquiasCard paroquias={data.paroquias} />
 
@@ -133,8 +127,6 @@ export function DashboardPage() {
           />
 
           <MudancaSeccaoTable dados={data.mudanca_seccao} />
-
-          <DashboardFooterBanner />
         </>
       )}
     </div>

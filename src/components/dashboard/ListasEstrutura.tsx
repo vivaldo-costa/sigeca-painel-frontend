@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
+import { PaginacaoLista, usePaginacao } from '@/components/ui/PaginacaoLista'
 import type { VigarariaPainel, AgrupamentoPainel, ParoquiaPainel } from '@/types/dashboard'
 
 interface ItemRanking { nome: string; total: number; extra?: string }
 
-/** Todas as listas (desde a mais popular até à menos) — sem corte em 10, com scroll interno para caberem no cartão. */
+const POR_PAGINA_RANKING = 10
+
+/** Todas as listas (desde a mais popular até à menos), organizadas por páginas em vez de scroll. */
 function ListaRanking({ itens, corBadge }: { itens: ItemRanking[]; corBadge: string }) {
   const [pronto, setPronto] = useState(false)
+  const pag = usePaginacao(itens, POR_PAGINA_RANKING)
   useEffect(() => {
     const t = requestAnimationFrame(() => setPronto(true))
     return () => cancelAnimationFrame(t)
@@ -19,8 +23,11 @@ function ListaRanking({ itens, corBadge }: { itens: ItemRanking[]; corBadge: str
   const max = Math.max(...itens.map((i) => i.total), 1)
 
   return (
-    <div className="max-h-[420px] space-y-2.5 overflow-y-auto pr-1">
-      {itens.map((item, i) => (
+    <div className="space-y-3">
+    <div className="space-y-2.5">
+      {pag.visiveis.map((item, j) => {
+        const i = pag.inicio + j
+        return (
         <div key={i} className="flex items-center gap-3">
           <span className="w-6 shrink-0 text-right font-mono text-[11px] text-subtle">{i + 1}</span>
           <div className="min-w-0 flex-1">
@@ -33,12 +40,15 @@ function ListaRanking({ itens, corBadge }: { itens: ItemRanking[]; corBadge: str
             <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-bg">
               <div
                 className={`h-full rounded-full transition-[width] duration-700 ease-out ${corBadge}`}
-                style={{ width: pronto ? `${(item.total / max) * 100}%` : '0%', transitionDelay: `${Math.min(i, 8) * 40}ms` }}
+                style={{ width: pronto ? `${(item.total / max) * 100}%` : '0%', transitionDelay: `${Math.min(j, 8) * 40}ms` }}
               />
             </div>
           </div>
         </div>
-      ))}
+        )
+      })}
+    </div>
+    <PaginacaoLista {...pag} porPagina={POR_PAGINA_RANKING} onMudar={pag.setPagina} />
     </div>
   )
 }
