@@ -58,7 +58,7 @@ export interface ResumoFinancasEvento {
 }
 
 export type MetodoPagamentoEvento = 'transferencia' | 'numerario' | 'multicaixa' | 'outro'
-export type EstadoPagamentoEvento = 'pendente' | 'confirmado' | 'estornado'
+export type EstadoPagamentoEvento = 'pendente' | 'confirmado' | 'estornado' | 'rejeitado'
 
 export const LABEL_METODO_PAGAMENTO: Record<MetodoPagamentoEvento, string> = {
   transferencia: 'Transferência',
@@ -78,6 +78,9 @@ export interface EventoPagamento {
   registado_por_nome: string | null
   confirmado_por_nome: string | null
   confirmado_em: string | null
+  motivo_rejeicao?: string | null
+  rejeitado_por_nome?: string | null
+  rejeitado_em?: string | null
   created_at: string
 }
 

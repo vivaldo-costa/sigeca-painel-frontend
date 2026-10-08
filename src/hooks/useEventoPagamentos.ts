@@ -43,3 +43,18 @@ export function useConfirmarPagamento(atividadeId: number, inscricaoId: number) 
     },
   })
 }
+
+/** Rejeita um pagamento pendente, com motivo obrigatório — não gera receita. */
+export function useRejeitarPagamento(inscricaoId: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ pagamentoId, motivo }: { pagamentoId: number; motivo: string }) => {
+      const { data } = await api.post(`/acampamentos/pagamentos/${pagamentoId}/rejeitar`, { motivo })
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['painel-evento-pagamentos', inscricaoId] })
+      queryClient.invalidateQueries({ queryKey: ['painel-evento-inscricao', inscricaoId] })
+    },
+  })
+}
