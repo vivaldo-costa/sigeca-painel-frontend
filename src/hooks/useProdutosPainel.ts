@@ -89,6 +89,21 @@ export function useAtualizarProduto() {
   })
 }
 
+/** Activar/inactivar vários produtos de uma vez (PATCH /produtos/estado-em-massa). */
+export function useAlterarEstadoProdutosMassa() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: { ids: number[]; ativo: boolean }) => {
+      const { data } = await api.patch<{ dados: { afectados: number } }>('/produtos/estado-em-massa', payload)
+      return data.dados
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['painel-produtos'] })
+      queryClient.invalidateQueries({ queryKey: ['painel-produto'] })
+    },
+  })
+}
+
 export function useRemoverProduto() {
   const queryClient = useQueryClient()
   return useMutation({

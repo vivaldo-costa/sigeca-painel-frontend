@@ -8,8 +8,14 @@ import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
 import { ModalRegistarCandidato } from '@/components/candidatosDirigente/ModalRegistarCandidato'
 import { LABEL_ESTADO_CANDIDATO, type EstadoCandidato, type CandidatoResumo } from '@/types/candidatoDirigente'
 import { formatarAgrupamento } from '@/lib/formatadores'
+import { useAuthStore } from '@/store/auth'
+import { usePermissao } from '@/hooks/usePermissao'
+
+/** Perfis de âmbito local — a API mostra-lhes automaticamente os candidatos do seu agrupamento. */
+const PERFIS_AMBITO_LOCAL = ['CHEFE_AGRUPAMENTO', 'ASSISTENTE']
 
 const CORES_ESTADO: Partial<Record<EstadoCandidato, string>> = {
+  em_validacao_chefe_agrupamento: 'bg-badge-blue-bg text-badge-blue-text',
   em_validacao_paroco: 'bg-badge-blue-bg text-badge-blue-text',
   em_aprovacao_vicarial: 'bg-badge-blue-bg text-badge-blue-text',
   em_validacao_diocesana: 'bg-badge-blue-bg text-badge-blue-text',
@@ -23,6 +29,9 @@ export function CandidatosDirigenteLista() {
   const [pesquisa, setPesquisa] = useState('')
   const [dioceseId, setDioceseId] = useState<number | ''>('')
   const [estado, setEstado] = useState('')
+  const user = useAuthStore((s) => s.user)
+  const { criar: podeCriar } = usePermissao('PercursoFormativo')
+  const ambitoLocal = PERFIS_AMBITO_LOCAL.includes(user?.perfil_nome ?? '')
   const { data: dioceses } = useOpcoesFiltro('dioceses')
   const { data, isLoading, isError } = useCandidatosDirigente({ dioceseId: dioceseId || undefined, estado: estado || undefined, pesquisa })
 
@@ -49,9 +58,11 @@ export function CandidatosDirigenteLista() {
             ]}
             linhas={data ?? []}
           />
-          <button onClick={() => setModalAberto(true)} className="flex items-center gap-1.5 rounded-lg bg-[#111827] px-3.5 py-2 text-[13px] font-semibold text-white transition hover:bg-black">
-            <Plus className="size-3.5" /> Registar Candidato
-          </button>
+          {podeCriar && (
+            <button onClick={() => setModalAberto(true)} className="flex items-center gap-1.5 rounded-lg bg-[#111827] px-3.5 py-2 text-[13px] font-semibold text-white transition hover:bg-black">
+              <Plus className="size-3.5" /> Registar Candidato
+            </button>
+          )}
         </div>
       </div>
 
@@ -65,16 +76,23 @@ export function CandidatosDirigenteLista() {
             className="w-full rounded-lg border border-border py-2 pl-9 pr-3 text-[13px] outline-none focus:border-[#111827]"
           />
         </form>
-        <select value={dioceseId} onChange={(e) => setDioceseId(Number(e.target.value) || '')} className="h-9 rounded-lg border border-border bg-white px-2.5 text-[12.5px] text-text outline-none focus:border-[#111827]">
-          <option value="">Todas as dioceses</option>
-          {dioceses?.map((d) => <option key={d.id} value={d.id}>{d.nome}</option>)}
-        </select>
+        {!ambitoLocal && (
+          <select value={dioceseId} onChange={(e) => setDioceseId(Number(e.target.value) || '')} className="h-9 rounded-lg border border-border bg-white px-2.5 text-[12.5px] text-text outline-none focus:border-[#111827]">
+            <option value="">Todas as dioceses</option>
+            {dioceses?.map((d) => <option key={d.id} value={d.id}>{d.nome}</option>)}
+          </select>
+        )}
         <select value={estado} onChange={(e) => setEstado(e.target.value)} className="h-9 rounded-lg border border-border bg-white px-2.5 text-[12.5px] text-text outline-none focus:border-[#111827]">
           <option value="">Todos os estados</option>
           {(Object.keys(LABEL_ESTADO_CANDIDATO) as EstadoCandidato[]).map((e) => <option key={e} value={e}>{LABEL_ESTADO_CANDIDATO[e]}</option>)}
         </select>
       </Card>
 
+      {ambitoLocal && (
+        <p className="mb-4 rounded-lg bg-badge-blue-bg px-4 py-3 text-[13px] text-badge-blue-text">
+          Vês os candidatos do teu agrupamento{user?.perfil_nome === 'ASSISTENTE' ? ' e da tua paróquia' : ''}. Abre um candidato para o validares quando for a tua vez.
+        </p>
+      )}
       {isError && <p className="mb-4 rounded-lg bg-badge-red-bg px-4 py-3 text-[13px] text-badge-red-text">Escolhe uma diocese para veres os candidatos — não tens visão nacional.</p>}
       {isLoading && <div className="flex justify-center py-16"><Loader2 className="size-6 animate-spin text-subtle" /></div>}
 

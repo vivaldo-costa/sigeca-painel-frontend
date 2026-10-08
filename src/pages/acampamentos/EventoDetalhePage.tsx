@@ -18,6 +18,8 @@ import { AbaSaudeOperacional } from '@/components/acampamentos/AbaSaudeOperacion
 import { AbaIndicadores } from '@/components/acampamentos/AbaIndicadores'
 import { AbaDocumentos } from '@/components/acampamentos/AbaDocumentos'
 import { ModalEventoForm } from '@/components/acampamentos/ModalEventoForm'
+import { PagamentosInscricoes } from '@/components/atividades/PagamentosInscricoes'
+import { Card } from '@/components/ui/Card'
 import { cn } from '@/lib/cn'
 
 const ABAS = [
@@ -25,6 +27,7 @@ const ABAS = [
   { chave: 'papeis', label: 'Papéis' },
   { chave: 'delegacoes', label: 'Delegações e Inscrições' },
   { chave: 'financas', label: 'Finanças' },
+  { chave: 'pagamentos', label: 'Validar Pagamentos' },
   { chave: 'comissoes', label: 'Comissões' },
   { chave: 'inventario', label: 'Inventário' },
   { chave: 'zonas', label: 'Zonas do Campo' },
@@ -79,6 +82,13 @@ export function EventoDetalhePage() {
           {aba === 'papeis' && <AbaPapeis atividadeId={atividadeId} />}
           {aba === 'delegacoes' && <AbaDelegacoes atividadeId={atividadeId} />}
           {aba === 'financas' && <AbaFinancas atividadeId={atividadeId} />}
+          {aba === 'pagamentos' && (
+            <Card className="p-4">
+              <h3 className="text-[14px] font-bold text-text">Comprovativos anexados às inscrições</h3>
+              <p className="mb-3 text-[11.5px] text-subtle">Confere cada comprovativo enviado pelos inscritos no portal e valida-o ou rejeita-o (com o motivo).</p>
+              <PagamentosInscricoes base="/acampamentos" atividadeId={atividadeId} />
+            </Card>
+          )}
           {aba === 'comissoes' && <AbaComissoes atividadeId={atividadeId} />}
           {aba === 'inventario' && <AbaInventario atividadeId={atividadeId} />}
           {aba === 'zonas' && <AbaZonas atividadeId={atividadeId} />}

@@ -1,3 +1,5 @@
+import type { EstadoCandidato } from './candidatoDirigente'
+
 export interface DashboardFormacaoDirigente {
   candidatos: {
     registados: number
@@ -32,6 +34,8 @@ export interface DashboardFormacaoDirigente {
     promessas_realizadas: number
     processos_concluidos: number
   }
+  /** Contagem de candidatos por estado — alimenta o funil por etapa. */
+  por_estado?: Partial<Record<EstadoCandidato, number>>
 }
 
 export interface FiltrosDashboardFormacao {

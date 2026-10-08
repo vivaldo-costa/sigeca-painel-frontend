@@ -37,6 +37,9 @@ export interface EventoDetalhe extends Omit<EventoResumo, 'total_delegacoes' | '
   descricao: string | null
   nivel_organizador_id: number | null
   prazo_inscricao: string | null
+  banco?: string | null
+  iban?: string | null
+  titular_conta?: string | null
   documentos: EventoDocumento[]
 }
 
@@ -57,6 +60,9 @@ export interface EventoFormPayload {
   ativo: boolean
   abrangencia: 'nacional' | 'dioceses'
   dioceses_ids: number[]
+  banco: string
+  iban: string
+  titular_conta: string
 }
 
 export const ESTADOS_EVENTO: EstadoEvento[] = ['preparacao', 'inscricoes_abertas', 'em_curso', 'encerrado', 'arquivado']

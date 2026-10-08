@@ -92,5 +92,5 @@ export function criarHooksAtividade(basePath: '/atividades' | '/formacoes') {
     })
   }
 
-  return { useLista, useInscritos, useCriar, useAtualizar, useRemover, useAtualizarInscricao }
+  return { basePath, useLista, useInscritos, useCriar, useAtualizar, useRemover, useAtualizarInscricao }
 }

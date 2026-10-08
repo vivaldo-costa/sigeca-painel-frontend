@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
-import { Users, Pencil, Trash2, Loader2, Check, X, Plus, UserRound } from 'lucide-react'
+import { Users, Pencil, Trash2, Loader2, Check, X, Plus, UserRound, Printer } from 'lucide-react'
 import { ModalNovaUnidade, ModalMembrosUnidade } from '@/components/unidadesSeccao/ModaisUnidadeSeccao'
 import { usePermissao } from '@/hooks/usePermissao'
 import {
-  useUnidadesSeccao, useRenomearUnidadeSeccao, useEliminarUnidadeSeccao,
+  useUnidadesSeccao, useRenomearUnidadeSeccao, useEliminarUnidadeSeccao, obterUnidadesComMembros,
 } from '@/hooks/useUnidadesSeccao'
+import { imprimirUnidadesSeccao } from '@/lib/imprimirUnidadesSeccao'
 import { useAuthStore } from '@/store/auth'
 import { useConfirmar } from '@/components/ui/ConfirmProvider'
 import { getApiErrorMessage } from '@/lib/api'
@@ -44,6 +45,8 @@ export function UnidadesSeccaoLista() {
   const [criarAberto, setCriarAberto] = useState(false)
   const [membrosDe, setMembrosDe] = useState<UnidadeSeccao | null>(null)
   const { criar: podeCriar } = usePermissao('Escuteiros')
+  // 'todos' enquanto gera o PDF de tudo; o id da unidade enquanto gera o PDF de uma só.
+  const [aImprimir, setAImprimir] = useState<'todos' | number | null>(null)
 
   const filtrados = useMemo(() => {
     const termo = filtroNome.trim().toLowerCase()
@@ -53,6 +56,51 @@ export function UnidadesSeccaoLista() {
       return true
     })
   }, [data, filtroTipo, filtroNome])
+
+  async function handleImprimirTodos() {
+    if (!filtrados.length) { notificar.aviso('Não há registos para imprimir.'); return }
+    setAImprimir('todos')
+    try {
+      const unidades = await obterUnidadesComMembros({
+        tipo: filtroTipo || undefined,
+        // Sem pesquisa, o filtro de tipo já basta (evita mandar centenas de ids no URL).
+        ids: filtroNome.trim() ? filtrados.map((u) => u.id) : undefined,
+      })
+      const comMembros = unidades.filter((u) => u.membros.length > 0)
+      if (!comMembros.length) { notificar.aviso('Nenhuma das unidades listadas tem membros na tua área.'); return }
+      const rotuloFiltro = filtroTipo ? `${LABEL_TIPO_UNIDADE_SECCAO[filtroTipo]}s` : 'Bandos, Patrulhas e Equipas'
+      const semMembros = unidades.length - comMembros.length
+      imprimirUnidadesSeccao(comMembros, {
+        titulo: `Lista de membros — ${rotuloFiltro}`,
+        nomeFicheiro: `lista-${filtroTipo || 'unidades'}-membros`,
+        subtitulo: [
+          `${comMembros.length} unidade(s) com membros`,
+          semMembros > 0 ? `${semMembros} sem membros na tua área (omitida(s))` : '',
+          filtroNome.trim() ? `Pesquisa: "${filtroNome.trim()}"` : '',
+        ].filter(Boolean).join(' · '),
+      })
+    } catch (err) {
+      notificar.erro(getApiErrorMessage(err, 'Não foi possível gerar a lista.'))
+    } finally {
+      setAImprimir(null)
+    }
+  }
+
+  async function handleImprimirUma(unidade: UnidadeSeccao) {
+    setAImprimir(unidade.id)
+    try {
+      const [u] = await obterUnidadesComMembros({ ids: [unidade.id] })
+      if (!u?.membros.length) { notificar.aviso('Não há membros na tua área para imprimir.'); return }
+      imprimirUnidadesSeccao([u], {
+        titulo: `Lista de membros — ${LABEL_TIPO_UNIDADE_SECCAO[u.tipo]} ${u.nome}`,
+        nomeFicheiro: `lista-${u.tipo}-${u.nome}`,
+      })
+    } catch (err) {
+      notificar.erro(getApiErrorMessage(err, 'Não foi possível gerar a lista.'))
+    } finally {
+      setAImprimir(null)
+    }
+  }
 
   function iniciarEdicao(unidade: UnidadeSeccao) {
     setAEditar(unidade)
@@ -99,11 +147,21 @@ export function UnidadesSeccaoLista() {
             {!ehAdmin && ' Só o Administrador pode mudar o nome ou eliminar.'}
           </p>
         </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={handleImprimirTodos}
+            disabled={aImprimir !== null || isLoading}
+            title="Imprimir (PDF) as unidades listadas com os respectivos membros"
+            className="flex items-center gap-1.5 rounded-lg border border-border bg-white px-3.5 py-2 text-[13px] font-semibold text-text hover:bg-bg disabled:opacity-50"
+          >
+            {aImprimir === 'todos' ? <Loader2 className="size-3.5 animate-spin" /> : <Printer className="size-3.5" />} Imprimir todos
+          </button>
         {podeCriar && (
           <button onClick={() => setCriarAberto(true)} className="flex items-center gap-1.5 rounded-lg bg-[#111827] px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-black">
             <Plus className="size-3.5" /> Novo
           </button>
         )}
+        </div>
       </div>
 
       <Card className="mb-5 flex flex-wrap items-center gap-3 p-4">
@@ -201,6 +259,10 @@ export function UnidadesSeccaoLista() {
                           <button onClick={() => setMembrosDe(u)} title="Membros"
                             className="flex h-7 items-center gap-1 rounded-lg border border-border px-2 text-[11.5px] font-medium text-text hover:bg-bg">
                             <UserRound className="size-3.5" /> Membros
+                          </button>
+                          <button onClick={() => handleImprimirUma(u)} disabled={aImprimir !== null} title="Imprimir lista de membros (PDF)"
+                            className="grid size-7 place-items-center rounded-lg border border-border text-text hover:bg-bg disabled:opacity-50">
+                            {aImprimir === u.id ? <Loader2 className="size-3.5 animate-spin" /> : <Printer className="size-3.5" />}
                           </button>
                           {!ehAdmin ? null : emEdicao ? (
                             <>

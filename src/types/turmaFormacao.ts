@@ -102,4 +102,6 @@ export interface TurmaDetalhe extends TurmaResumo {
   documentos: TurmaDocumento[]
   autorizacoes: TurmaAutorizacao[]
   relatorio: TurmaRelatorio | null
+  /** Limite efectivo de participantes: 40, ou o máximo do Catálogo se for menor. */
+  limite_participantes?: number
 }

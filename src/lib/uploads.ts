@@ -10,7 +10,7 @@ import { API_BASE_URL } from './apiUrl'
  * própria, em vez de partilharem uma só 'atividades'.
  */
 export function uploadUrl(
-  subpasta: 'avatar' | 'comprovativos_pedidos' | 'produtos' | 'documentos' | 'transferencias' | 'eventos' | 'formacoes' | 'votacoes' | 'noticias' | 'denuncias' | 'eventos-documentos' | 'comissoes-documentos' | 'candidatos-dirigente-documentos' | 'tutorias-evidencias' | 'aparencia' | 'cartao' | 'eventos-galeria',
+  subpasta: 'avatar' | 'comprovativos_pedidos' | 'produtos' | 'documentos' | 'transferencias' | 'eventos' | 'formacoes' | 'votacoes' | 'noticias' | 'denuncias' | 'eventos-documentos' | 'comissoes-documentos' | 'candidatos-dirigente-documentos' | 'tutorias-evidencias' | 'aparencia' | 'cartao' | 'eventos-galeria' | 'comprovativos_inscricao' | 'eventos-pagamentos',
   ficheiro: string | null | undefined,
 ): string | null {
   if (!ficheiro) return null

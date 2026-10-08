@@ -6,6 +6,7 @@ import { notificar } from '@/lib/notificar'
 import { ESTADOS_INSCRICAO_EVENTO, LABEL_ESTADO_INSCRICAO, type EstadoInscricaoEvento, type DadosParticipante } from '@/types/eventoInscricao'
 import { InscricaoStepper } from '@/components/acampamentos/InscricaoStepper'
 import { useEventoPagamentos, useRegistarPagamento, useConfirmarPagamento } from '@/hooks/useEventoPagamentos'
+import { uploadUrl } from '@/lib/uploads'
 import { LABEL_METODO_PAGAMENTO, type MetodoPagamentoEvento } from '@/types/eventoFinancas'
 
 interface Props { id: number; delegacaoId: number; onClose: () => void }
@@ -184,6 +185,9 @@ function SeccaoPagamentos({ atividadeId, inscricaoId }: { atividadeId: number; i
               <p className="text-[10.5px] text-subtle">
                 {p.data_pagamento ? new Date(p.data_pagamento).toLocaleDateString('pt-PT') : '—'}
                 {p.estado === 'confirmado' && p.confirmado_por_nome && ` · confirmado por ${p.confirmado_por_nome}`}
+                {p.comprovativo_path && (
+                  <> · <a href={uploadUrl('eventos-pagamentos', p.comprovativo_path)!} target="_blank" rel="noreferrer" className="font-medium text-text underline">ver comprovativo</a></>
+                )}
               </p>
             </div>
             {p.estado === 'pendente' ? (

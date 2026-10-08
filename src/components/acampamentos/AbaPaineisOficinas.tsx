@@ -1,10 +1,11 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { Plus, Trash2, Pencil, Users, X, Presentation, Wrench, Loader2, UserPlus } from 'lucide-react'
+import { Plus, Trash2, Pencil, Users, X, Presentation, Wrench, Loader2, UserPlus, Search, UserRound } from 'lucide-react'
 import {
   useSessoesEvento, useGuardarSessao, useRemoverSessao, useDefinirLimitesSessoes, useInscritosSessoes,
   useParticipantesSessao, useAdicionarParticipantes, useRetirarParticipante,
   type SessaoEvento, type SessaoPayload, type TipoSessao,
 } from '@/hooks/useEventoSessoes'
+import { useUtilizadores } from '@/hooks/useUtilizadores'
 import { Card } from '@/components/ui/Card'
 import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
 import { useConfirmar } from '@/components/ui/ConfirmProvider'
@@ -22,6 +23,9 @@ const horario = (s: SessaoEvento) => [
   s.data ? new Date(s.data).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' }) : null,
   s.hora_inicio ? `${s.hora_inicio.slice(0, 5)}${s.hora_fim ? `–${s.hora_fim.slice(0, 5)}` : ''}` : null,
 ].filter(Boolean).join(' · ')
+
+/** Dirigente responsável; sessões antigas só têm o texto livre `responsavel`. */
+const responsavelDe = (s: SessaoEvento) => s.responsavel_nome ?? s.responsavel
 
 /**
  * Gerir eventos › Painéis e Oficinas — cria os painéis (teóricos) e as
@@ -75,8 +79,15 @@ export function AbaPaineisOficinas({ atividadeId }: { atividadeId: number }) {
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-text">{s.titulo}</p>
                     <p className="text-[11.5px] text-subtle">
-                      {[horario(s), s.local, s.responsavel && `Resp.: ${s.responsavel}`, s.painel_titulo && `Pratica: ${s.painel_titulo}`].filter(Boolean).join(' · ') || '—'}
+                      {[horario(s), s.local, s.painel_titulo && `Pratica: ${s.painel_titulo}`].filter(Boolean).join(' · ') || '—'}
                     </p>
+                    {(s.orador || responsavelDe(s)) && (
+                      <p className="text-[11.5px] text-subtle">
+                        {s.orador && <>Orador: <span className="font-medium text-text">{s.orador}</span></>}
+                        {s.orador && responsavelDe(s) && ' · '}
+                        {responsavelDe(s) && <>Dirigente responsável: <span className="font-medium text-text">{responsavelDe(s)}</span></>}
+                      </p>
+                    )}
                   </div>
                   <button onClick={() => setAberta(s)} className="flex items-center gap-1 rounded-md border border-border bg-white px-2 py-1 text-[11.5px] font-medium text-text hover:bg-bg">
                     <Users className="size-3" /> {s.total_participantes}{s.vagas ? ` / ${s.vagas}` : ''}
@@ -132,17 +143,25 @@ function LimitesParticipacao({ atividadeId, limitePaineis, limiteOficinas }: { a
 function ModalSessao({ atividadeId, tipo, sessao, paineis, onClose }: { atividadeId: number; tipo: TipoSessao; sessao?: SessaoEvento; paineis: SessaoEvento[]; onClose: () => void }) {
   const guardar = useGuardarSessao(atividadeId)
   const [f, setF] = useState<SessaoPayload>({
-    titulo: sessao?.titulo ?? '', descricao: sessao?.descricao ?? '', responsavel: sessao?.responsavel ?? '',
+    titulo: sessao?.titulo ?? '', descricao: sessao?.descricao ?? '', orador: sessao?.orador ?? '',
+    responsavel: sessao?.responsavel ?? '', responsavel_id: sessao?.responsavel_id ?? null,
     data: sessao?.data?.slice(0, 10) ?? '', hora_inicio: sessao?.hora_inicio?.slice(0, 5) ?? '', hora_fim: sessao?.hora_fim?.slice(0, 5) ?? '',
     local: sessao?.local ?? '', vagas: sessao?.vagas ?? '', painel_id: sessao?.painel_id ?? null,
   })
   const set = (patch: SessaoPayload) => setF((x) => ({ ...x, ...patch }))
+  const [dirigente, setDirigente] = useState<{ id: number; nome: string } | null>(
+    sessao?.responsavel_id ? { id: sessao.responsavel_id, nome: sessao.responsavel_nome ?? `#${sessao.responsavel_id}` } : null,
+  )
+  const [pesquisa, setPesquisa] = useState('')
+  const { data: resultados } = useUtilizadores({ pesquisa, porPagina: 6 })
   const entrada = 'w-full rounded-lg border border-border px-3 py-2 text-[13px] outline-none focus:border-[#111827]'
 
   async function submeter(e: FormEvent) {
     e.preventDefault()
     try {
-      await guardar.mutateAsync({ id: sessao?.id, payload: { ...f, tipo } })
+      // Com dirigente escolhido, o texto livre antigo deixa de ser usado
+      const payload = { ...f, tipo, responsavel_id: dirigente?.id ?? null, responsavel: dirigente ? null : f.responsavel }
+      await guardar.mutateAsync({ id: sessao?.id, payload })
       notificar.sucesso(sessao ? 'Actualizado.' : `${ROTULO[tipo].um} criad${tipo === 'painel' ? 'o' : 'a'}.`)
       onClose()
     } catch (err) { notificar.erro(getApiErrorMessage(err, 'Não foi possível guardar.')) }
@@ -157,7 +176,34 @@ function ModalSessao({ atividadeId, tipo, sessao, paineis, onClose }: { atividad
         </div>
         <input required placeholder="Título" value={f.titulo ?? ''} onChange={(e) => set({ titulo: e.target.value })} className={entrada} />
         <textarea rows={2} placeholder="Descrição / conteúdos" value={f.descricao ?? ''} onChange={(e) => set({ descricao: e.target.value })} className={cn(entrada, 'resize-none')} />
-        <input placeholder={tipo === 'painel' ? 'Orador / formador' : 'Monitor / responsável'} value={f.responsavel ?? ''} onChange={(e) => set({ responsavel: e.target.value })} className={entrada} />
+        <input placeholder={tipo === 'painel' ? 'Orador (quem dá o painel)' : 'Orador / monitor (quem dá a oficina)'} value={f.orador ?? ''} onChange={(e) => set({ orador: e.target.value })} className={entrada} />
+        <div>
+          <p className="mb-1 text-[11.5px] text-subtle">Dirigente responsável</p>
+          {dirigente ? (
+            <div className="flex items-center justify-between rounded-lg bg-bg px-3 py-2 text-[13px]">
+              <span className="flex items-center gap-1.5"><UserRound className="size-3.5 text-subtle" /> {dirigente.nome}</span>
+              <button type="button" onClick={() => setDirigente(null)} className="text-[11px] text-subtle hover:text-text">Trocar</button>
+            </div>
+          ) : (
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-subtle" />
+              <input value={pesquisa} onChange={(e) => setPesquisa(e.target.value)} placeholder="Pesquisar dirigente por nome ou Nº SIGECA..." className={cn(entrada, 'pl-9')} />
+              {pesquisa.length >= 2 && resultados && resultados.dados.length > 0 && (
+                <div className="absolute z-10 mt-1 w-full rounded-lg border border-border bg-white shadow-lg">
+                  {resultados.dados.map((u) => (
+                    <button type="button" key={u.id} onClick={() => { setDirigente({ id: u.id, nome: u.nome }); setPesquisa('') }} className="flex w-full items-center justify-between px-3 py-2 text-left text-[12.5px] hover:bg-bg">
+                      <span>{u.nome}</span>
+                      <span className="font-mono text-[11px] text-subtle">{u.codigo_associado}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          {!dirigente && f.responsavel && (
+            <p className="mt-1 text-[11px] text-subtle">Registo antigo: <span className="font-medium text-text">{f.responsavel}</span> — escolhe o dirigente para o substituir.</p>
+          )}
+        </div>
         {tipo === 'oficina' && (
           <select value={f.painel_id ?? ''} onChange={(e) => set({ painel_id: Number(e.target.value) || null })} className={entrada}>
             <option value="">Painel teórico relacionado (opcional)</option>

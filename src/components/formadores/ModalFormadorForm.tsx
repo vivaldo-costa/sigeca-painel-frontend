@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
-import { X, Loader2, Search, UserRound } from 'lucide-react'
-import { useCadastrarFormador, useAtualizarFormador } from '@/hooks/useFormadores'
+import { X, Loader2, Search, UserRound, TriangleAlert } from 'lucide-react'
+import { useCadastrarFormador, useAtualizarFormador, useFormadores } from '@/hooks/useFormadores'
+import { useOpcoesFiltro } from '@/hooks/useDashboardPainel'
 import { useUtilizadores } from '@/hooks/useUtilizadores'
 import { getApiErrorMessage } from '@/lib/api'
 import { Button } from '@/components/ui/Button'
@@ -16,7 +17,15 @@ export function ModalFormadorForm({ formador, onClose }: Props) {
     certificacoes: formador?.certificacoes ?? '',
     biografia: formador?.biografia ?? '',
     ativo: formador ? !!formador.ativo : true,
+    responsavel_formacao_diocese: !!formador?.responsavel_formacao_diocese,
+    diocese_id: formador?.diocese_id ?? null,
   })
+  const { data: dioceses } = useOpcoesFiltro('dioceses')
+  const { data: todosFormadores } = useFormadores('')
+  // No máximo um responsável de formação por diocese — avisa já aqui (a API também recusa).
+  const responsavelExistente = form.responsavel_formacao_diocese && form.diocese_id
+    ? todosFormadores?.find((f) => !!f.responsavel_formacao_diocese && f.diocese_id === form.diocese_id && f.id !== formador?.id)
+    : undefined
   const [pesquisa, setPesquisa] = useState('')
   const [utilizadorEscolhido, setUtilizadorEscolhido] = useState<{ id: number; nome: string } | null>(
     formador ? { id: formador.utilizador_id, nome: formador.nome } : null,
@@ -30,6 +39,8 @@ export function ModalFormadorForm({ formador, onClose }: Props) {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!utilizadorEscolhido) { notificar.erro('Escolhe o utilizador a registar como formador.'); return }
+    if (form.responsavel_formacao_diocese && !form.diocese_id) { notificar.erro('Escolhe a diocese de que é responsável de formação.'); return }
+    if (responsavelExistente) { notificar.erro(`Esta diocese já tem responsável de formação: ${responsavelExistente.nome}.`); return }
     try {
       if (formador) await atualizar.mutateAsync({ id: formador.id, payload: form })
       else await cadastrar.mutateAsync({ ...form, utilizador_id: utilizadorEscolhido.id })
@@ -90,6 +101,38 @@ export function ModalFormadorForm({ formador, onClose }: Props) {
               className="w-full resize-none rounded-xl border border-border px-3.5 py-2 text-[13px] outline-none focus:border-[#111827]"
             />
           </Campo>
+
+          <div className="rounded-xl border border-border p-3.5">
+            <label className="flex items-center gap-2.5 text-[13px] font-medium text-text">
+              <input
+                type="checkbox"
+                checked={form.responsavel_formacao_diocese}
+                onChange={(e) => setForm((f) => ({ ...f, responsavel_formacao_diocese: e.target.checked, diocese_id: e.target.checked ? f.diocese_id : null }))}
+                className="size-4"
+              />
+              Responsável de formação da diocese
+            </label>
+            {form.responsavel_formacao_diocese && (
+              <div className="mt-3">
+                <Campo label="Diocese">
+                  <select
+                    value={form.diocese_id ?? ''}
+                    onChange={(e) => setForm((f) => ({ ...f, diocese_id: Number(e.target.value) || null }))}
+                    className="h-10 w-full rounded-xl border border-border bg-white px-3 text-[13px] text-text outline-none focus:border-[#111827]"
+                  >
+                    <option value="">Selecciona a diocese</option>
+                    {dioceses?.map((d) => <option key={d.id} value={d.id}>{d.nome}</option>)}
+                  </select>
+                </Campo>
+                {responsavelExistente && (
+                  <p className="mt-2 flex items-start gap-1.5 rounded-lg bg-badge-orange-bg px-3 py-2 text-[12px] text-badge-orange-text">
+                    <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
+                    Esta diocese já tem responsável de formação: {responsavelExistente.nome}. Retira-lhe primeiro essa função.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
 
           <div className="flex gap-3 border-t border-border pt-4">
             <Button type="button" variant="secondary" onClick={onClose} className="flex-1">Cancelar</Button>

@@ -1,7 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Package, Plus, Loader2, Search, Pencil, Trash2, ShoppingBag, Link2 } from 'lucide-react'
-import { useProdutos, useCategorias, useRemoverProduto } from '@/hooks/useProdutosPainel'
+import { Package, Plus, Loader2, Search, Pencil, Trash2, ShoppingBag, Link2, CircleCheck, CircleX } from 'lucide-react'
+import { useProdutos, useCategorias, useRemoverProduto, useAlterarEstadoProdutosMassa } from '@/hooks/useProdutosPainel'
+import { useSelecaoMultipla } from '@/hooks/useSelecaoMultipla'
+import { SelecaoMultiplaBar } from '@/components/crud/SelecaoMultiplaBar'
+import { useConfirmar } from '@/components/ui/ConfirmProvider'
+import { notificar } from '@/lib/notificar'
+import { getApiErrorMessage } from '@/lib/api'
 import { usePermissao } from '@/hooks/usePermissao'
 import { Card } from '@/components/ui/Card'
 import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
@@ -20,6 +25,40 @@ export function ProdutosLista() {
   const categorias = useCategorias()
   const remover = useRemoverProduto()
   const { criar: podeCriar, editar: podeEditar, apagar: podeEliminar } = usePermissao('Produtos')
+
+  // Selecção múltipla — sem paginação, "a página" é tudo o que está visível com os filtros actuais.
+  const idsVisiveis = data?.map((p) => p.id) ?? []
+  const selecao = useSelecaoMultipla(idsVisiveis, idsVisiveis.length)
+  const alterarEstadoMassa = useAlterarEstadoProdutosMassa()
+  const confirmar = useConfirmar()
+
+  // Mudou o filtro — a selecção anterior pode incluir produtos que já não se vêem; mais seguro limpar.
+  useEffect(() => {
+    selecao.limpar()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtros])
+
+  async function handleEstadoMassa(ativo: boolean) {
+    const ids = selecao.idsSelecionados
+    if (!ids.length) return
+    const n = ids.length
+    const ok = await confirmar({
+      titulo: ativo ? 'Activar produtos' : 'Inactivar produtos',
+      mensagem: ativo
+        ? `Activar ${n} produto${n !== 1 ? 's' : ''}? Volta${n !== 1 ? 'm' : ''} a aparecer na loja.`
+        : `Inactivar ${n} produto${n !== 1 ? 's' : ''}? Deixa${n !== 1 ? 'm' : ''} de aparecer na loja, mas não ${n !== 1 ? 'são eliminados' : 'é eliminado'}.`,
+      textoConfirmar: ativo ? 'Activar' : 'Inactivar',
+      perigoso: !ativo,
+    })
+    if (!ok) return
+    try {
+      const r = await alterarEstadoMassa.mutateAsync({ ids, ativo })
+      notificar.sucesso(`${r.afectados} produto(s) ${ativo ? 'activado(s)' : 'inactivado(s)'}.`)
+      selecao.limpar()
+    } catch (err) {
+      notificar.erro(getApiErrorMessage(err, `Não foi possível ${ativo ? 'activar' : 'inactivar'} os produtos seleccionados.`))
+    }
+  }
 
   async function handleEliminar(id: number) {
     if (confirmarEliminar !== id) {
@@ -100,12 +139,45 @@ export function ProdutosLista() {
         </select>
       </Card>
 
+      {podeEditar && !!data?.length && (
+        <label className="mb-3 inline-flex cursor-pointer select-none items-center gap-2 text-[12.5px] font-medium text-text">
+          <input
+            type="checkbox"
+            checked={selecao.todosDaPaginaSelecionados}
+            onChange={selecao.alternarPagina}
+            className="size-4"
+          />
+          Seleccionar todos (desta página)
+        </label>
+      )}
+
+      <SelecaoMultiplaBar
+        totalSelecionado={selecao.totalSelecionado}
+        todosOsResultados={selecao.todosOsResultados}
+        todosDaPaginaSelecionados={selecao.todosDaPaginaSelecionados}
+        totalGeral={idsVisiveis.length}
+        totalNaPagina={idsVisiveis.length}
+        onSelecionarTodosOsResultados={selecao.selecionarTodosOsResultados}
+        onLimpar={selecao.limpar}
+      >
+        {podeEditar && (
+          <>
+            <button onClick={() => handleEstadoMassa(true)} disabled={alterarEstadoMassa.isPending} className="flex items-center gap-1 rounded-md bg-white/10 px-2.5 py-1 text-[12px] font-medium hover:bg-white/20 disabled:opacity-50">
+              <CircleCheck className="size-3.5" /> Activar seleccionados
+            </button>
+            <button onClick={() => handleEstadoMassa(false)} disabled={alterarEstadoMassa.isPending} className="flex items-center gap-1 rounded-md bg-white/10 px-2.5 py-1 text-[12px] font-medium hover:bg-white/20 disabled:opacity-50">
+              <CircleX className="size-3.5" /> Inactivar seleccionados
+            </button>
+          </>
+        )}
+      </SelecaoMultiplaBar>
+
       {isLoading && <div className="flex justify-center py-16"><Loader2 className="size-6 animate-spin text-subtle" /></div>}
 
       {/* Grelha de colunas — 1 coluna em telemóvel, cresce até 5 em ecrãs largos. Nunca uma tabela. */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
         {data?.map((p, i) => (
-          <Card key={p.id} className="hover-lift animate-slide-up overflow-hidden" style={{ animationDelay: `${Math.min(i, 12) * 30}ms` }}>
+          <Card key={p.id} className={`hover-lift animate-slide-up overflow-hidden ${selecao.estaSelecionado(p.id) ? 'ring-2 ring-[#111827]' : ''}`} style={{ animationDelay: `${Math.min(i, 12) * 30}ms` }}>
             <div className="relative aspect-square bg-bg">
               {p.imagem ? (
                 <img src={uploadUrl('produtos', p.imagem)!} className="size-full bg-white object-contain p-1" alt={p.nome} loading="lazy" />
@@ -114,6 +186,17 @@ export function ProdutosLista() {
               )}
               {p.etiqueta && (
                 <span className="absolute left-2 top-2 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">{p.etiqueta}</span>
+              )}
+              {podeEditar && (
+                <label className="absolute bottom-2 left-2 grid size-7 cursor-pointer place-items-center rounded-md bg-white/90 shadow-sm">
+                  <input
+                    type="checkbox"
+                    checked={selecao.estaSelecionado(p.id)}
+                    onChange={() => selecao.alternarItem(p.id)}
+                    className="size-4"
+                    aria-label={`Seleccionar ${p.nome}`}
+                  />
+                </label>
               )}
               {!p.ativo && (
                 <span className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-bold text-white">Inactivo</span>

@@ -44,6 +44,7 @@ export function FormadoresLista() {
               { titulo: 'Nº SIGECA', valor: (f) => f.codigo_associado },
               { titulo: 'Especialidades', valor: (f) => f.especialidades ?? '—' },
               { titulo: 'Cursos', valor: (f) => f.total_cursos },
+              { titulo: 'Responsável de formação', valor: (f) => (f.responsavel_formacao_diocese ? f.diocese_nome ?? 'Sim' : '—') },
               { titulo: 'Estado', valor: (f) => (f.ativo ? 'Activo' : 'Inactivo') },
             ]}
             linhas={data ?? []}
@@ -78,7 +79,14 @@ export function FormadoresLista() {
                 <h3 className="font-semibold text-text">{f.nome}</h3>
                 <p className="font-mono text-[11px] text-subtle">{f.codigo_associado}</p>
               </div>
-              {!f.ativo && <span className="rounded-full bg-bg px-2 py-0.5 text-[10px] font-semibold text-subtle">Inactivo</span>}
+              <div className="flex flex-wrap justify-end gap-1">
+                {!!f.responsavel_formacao_diocese && (
+                  <span className="rounded-full bg-badge-blue-bg px-2 py-0.5 text-[10px] font-semibold text-badge-blue-text">
+                    Responsável de formação{f.diocese_nome ? ` — ${f.diocese_nome}` : ''}
+                  </span>
+                )}
+                {!f.ativo && <span className="rounded-full bg-bg px-2 py-0.5 text-[10px] font-semibold text-subtle">Inactivo</span>}
+              </div>
             </div>
             {f.especialidades && <p className="mt-2 text-[12.5px] text-muted">{f.especialidades}</p>}
             <p className="mt-1.5 text-[11.5px] text-subtle">{f.total_cursos} curso{f.total_cursos !== 1 && 's'}</p>

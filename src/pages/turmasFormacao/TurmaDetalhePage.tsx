@@ -53,8 +53,16 @@ export function TurmaDetalhePage() {
   if (isLoading) return <div className="flex justify-center py-16"><Loader2 className="size-6 animate-spin text-subtle" /></div>
   if (!turma) return null
 
+  const limiteParticipantes = turma.limite_participantes
+    ?? (turma.maximo_participantes ? Math.min(turma.maximo_participantes, 40) : 40)
+  const turmaCheia = turma.participantes.length >= limiteParticipantes
+
   async function handleAdicionarParticipante() {
     if (!candidatoEscolhido) return
+    if (turmaCheia) {
+      notificar.erro(`Esta turma já tem ${turma!.participantes.length} participantes — o limite é de ${limiteParticipantes} por turma.`)
+      return
+    }
     try {
       await adicionarParticipante.mutateAsync(Number(candidatoEscolhido))
       setCandidatoEscolhido('')
@@ -142,7 +150,7 @@ export function TurmaDetalhePage() {
         <dl className="grid grid-cols-2 gap-3 text-[12.5px] sm:grid-cols-3">
           <div><dt className="text-subtle">Local</dt><dd className="text-text">{turma.local ?? '—'}</dd></div>
           <div><dt className="text-subtle">Data</dt><dd className="text-text">{turma.data_inicio ? new Date(turma.data_inicio).toLocaleDateString('pt-PT') : '—'} a {turma.data_fim ? new Date(turma.data_fim).toLocaleDateString('pt-PT') : '—'}</dd></div>
-          <div><dt className="text-subtle">Participantes</dt><dd className="text-text">{turma.participantes.length}{turma.minimo_participantes && turma.maximo_participantes ? ` (mín. ${turma.minimo_participantes}, máx. ${turma.maximo_participantes})` : ''}</dd></div>
+          <div><dt className="text-subtle">Participantes</dt><dd className="text-text">{turma.participantes.length} / {limiteParticipantes}{turma.minimo_participantes ? ` (mín. ${turma.minimo_participantes})` : ''}</dd></div>
         </dl>
         {turma.numero_autorizacao && (
           <a
@@ -157,8 +165,18 @@ export function TurmaDetalhePage() {
 
       {/* Participantes */}
       <Card className="mb-4 p-4">
-        <p className="mb-3 text-[12.5px] font-semibold text-muted">Participantes</p>
-        {podeEditarConstituicao && (
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <p className="text-[12.5px] font-semibold text-muted">Participantes</p>
+          <span className={`rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${turmaCheia ? 'bg-badge-orange-bg text-badge-orange-text' : 'bg-bg text-subtle'}`}>
+            {turma.participantes.length} de {limiteParticipantes}
+          </span>
+        </div>
+        {podeEditarConstituicao && turmaCheia && (
+          <p className="mb-3 rounded-lg bg-badge-orange-bg px-3 py-2 text-[12px] text-badge-orange-text">
+            Turma completa — o limite é de {limiteParticipantes} participantes por turma. Cria outra turma para os restantes candidatos.
+          </p>
+        )}
+        {podeEditarConstituicao && !turmaCheia && (
           <div className="mb-3 flex gap-2">
             <select value={candidatoEscolhido} onChange={(e) => setCandidatoEscolhido(e.target.value)} className="h-9 flex-1 rounded-lg border border-border bg-white px-2.5 text-[12.5px] outline-none focus:border-[#111827]">
               <option value="">Escolhe um candidato da Lista de Candidatos...</option>

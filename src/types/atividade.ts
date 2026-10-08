@@ -27,6 +27,9 @@ export interface AtividadePainel {
   seccao_nome: string | null
   created_at: string
   total_inscritos: number
+  banco?: string | null
+  iban?: string | null
+  titular_conta?: string | null
 }
 
 export interface InscritoAtividade {
@@ -73,4 +76,7 @@ export interface AtividadeFormPayload {
   seccao_id: number | ''
   abrangencia: 'nacional' | 'dioceses'
   dioceses_ids: number[]
+  banco: string
+  iban: string
+  titular_conta: string
 }

@@ -70,9 +70,29 @@ export interface MembroUnidadeSeccao {
   nome: string
   codigo_associado: string
   estado: string
+  cargo_funcao?: string | null
   seccao_nome: string | null
   agrupamento_nome: string | null
   ab_agrupamento: string | null
+}
+
+export interface UnidadeComMembros {
+  id: number
+  tipo: TipoUnidadeSeccao
+  nome: string
+  membros: MembroUnidadeSeccao[]
+}
+
+/**
+ * Todas as unidades (de um tipo, ou só as indicadas em `ids`) com os seus
+ * membros, num só pedido — usado pelo "Imprimir todos". Chamada pontual
+ * (no clique), por isso não é uma query em cache.
+ */
+export async function obterUnidadesComMembros(params: { tipo?: TipoUnidadeSeccao; ids?: number[] }) {
+  const { data } = await api.get<{ dados: UnidadeComMembros[] }>('/unidades-seccao/com-membros', {
+    params: { tipo: params.tipo || undefined, ids: params.ids?.join(',') },
+  })
+  return data.dados
 }
 
 /** Membros de um Bando/Patrulha/Equipa (só os da área do perfil). */

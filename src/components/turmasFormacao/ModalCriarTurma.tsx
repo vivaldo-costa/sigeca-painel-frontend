@@ -11,6 +11,9 @@ import { notificar } from '@/lib/notificar'
 
 interface Props { onClose: () => void }
 
+/** Limite de participantes por turma (pedido da Coordenação) — o máximo do Catálogo prevalece se for menor. */
+const LIMITE_PARTICIPANTES_TURMA = 40
+
 export function ModalCriarTurma({ onClose }: Props) {
   const navigate = useNavigate()
   const { data: formacoes } = useCatalogoFormacoes('')
@@ -21,16 +24,26 @@ export function ModalCriarTurma({ onClose }: Props) {
   const [dataInicio, setDataInicio] = useState('')
   const [dataFim, setDataFim] = useState('')
   const [local, setLocal] = useState('')
+  const [numeroPrevisto, setNumeroPrevisto] = useState('')
+  const formacaoEscolhida = formacoes?.find((f) => String(f.id) === formacaoId)
+  const limite = formacaoEscolhida?.maximo_participantes && formacaoEscolhida.maximo_participantes > 0
+    ? Math.min(formacaoEscolhida.maximo_participantes, LIMITE_PARTICIPANTES_TURMA)
+    : LIMITE_PARTICIPANTES_TURMA
 
   const criar = useCriarTurma()
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!formacaoId || !dioceseId) { notificar.erro('Escolhe a formação e a diocese.'); return }
+    if (numeroPrevisto && Number(numeroPrevisto) > limite) {
+      notificar.erro(`O número previsto de participantes não pode passar de ${limite} por turma.`)
+      return
+    }
     try {
       const resultado = await criar.mutateAsync({
         formacao_id: Number(formacaoId), diocese_id: Number(dioceseId),
         data_inicio: dataInicio || undefined, data_fim: dataFim || undefined, local: local || undefined,
+        numero_previsto_participantes: numeroPrevisto ? Number(numeroPrevisto) : undefined,
       })
       onClose()
       navigate(`/turmas-formacao/${resultado.dados.id}`)
@@ -68,9 +81,18 @@ export function ModalCriarTurma({ onClose }: Props) {
             <Campo label="Data de fim"><TextField type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} /></Campo>
           </Linha2>
 
-          <Campo label="Local"><TextField value={local} onChange={(e) => setLocal(e.target.value)} /></Campo>
+          <Linha2>
+            <Campo label="Local"><TextField value={local} onChange={(e) => setLocal(e.target.value)} /></Campo>
+            <Campo label={`Nº previsto de participantes (máx. ${limite})`}>
+              <TextField
+                type="number" min="1" max={limite}
+                value={numeroPrevisto}
+                onChange={(e) => setNumeroPrevisto(e.target.value === '' ? '' : String(Math.min(Number(e.target.value), limite)))}
+              />
+            </Campo>
+          </Linha2>
 
-          <p className="text-[11.5px] text-subtle">O código da turma é gerado automaticamente. Participantes, formadores e documentos adicionam-se a seguir, no detalhe da turma.</p>
+          <p className="text-[11.5px] text-subtle">O código da turma é gerado automaticamente. Participantes, formadores e documentos adicionam-se a seguir, no detalhe da turma — no máximo {limite} participantes por turma.</p>
 
           <div className="flex gap-3 pt-2">
             <Button type="button" variant="secondary" onClick={onClose} className="flex-1">Cancelar</Button>

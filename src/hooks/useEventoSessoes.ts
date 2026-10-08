@@ -11,6 +11,13 @@ export interface SessaoEvento {
   painel_titulo: string | null
   titulo: string
   descricao: string | null
+  /** Quem dá a sessão (texto livre). */
+  orador: string | null
+  /** Dirigente responsável (utilizador do sistema). */
+  responsavel_id: number | null
+  responsavel_nome: string | null
+  responsavel_codigo: string | null
+  /** Texto livre antigo — só se mostra quando não há responsavel_id. */
   responsavel: string | null
   data: string | null
   hora_inicio: string | null
@@ -48,7 +55,7 @@ export interface ParticipanteSessao {
   ab_agrupamento: string | null
 }
 
-export type SessaoPayload = Partial<Pick<SessaoEvento, 'titulo' | 'descricao' | 'responsavel' | 'data' | 'hora_inicio' | 'hora_fim' | 'local' | 'painel_id'>> & {
+export type SessaoPayload = Partial<Pick<SessaoEvento, 'titulo' | 'descricao' | 'orador' | 'responsavel' | 'responsavel_id' | 'data' | 'hora_inicio' | 'hora_fim' | 'local' | 'painel_id'>> & {
   tipo?: TipoSessao
   vagas?: number | string | null
 }

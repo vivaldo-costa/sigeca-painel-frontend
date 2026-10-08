@@ -3,6 +3,7 @@ import { X, Loader2, ImagePlus, Images } from 'lucide-react'
 import { getApiErrorMessage } from '@/lib/api'
 import { uploadUrl } from '@/lib/uploads'
 import { CampoAbrangencia } from '@/components/atividades/CampoAbrangencia'
+import { CampoCoordenadasBancarias } from '@/components/atividades/CampoCoordenadasBancarias'
 import { Button } from '@/components/ui/Button'
 import { Campo, Linha2, TextField, SelectField } from '@/components/crud/FormShell'
 import type { criarHooksAtividade } from '@/hooks/criarHooksAtividade'
@@ -113,6 +114,9 @@ function paraForm(a: AtividadePainel | null): AtividadeFormPayload {
     seccao_id: a?.seccao_id ?? '',
     abrangencia: a?.abrangencia ?? 'nacional',
     dioceses_ids: a?.dioceses_ids ?? [],
+    banco: a?.banco ?? '',
+    iban: a?.iban ?? '',
+    titular_conta: a?.titular_conta ?? '',
   }
 }
 
@@ -203,6 +207,9 @@ export function ModalAtividadeForm({ hooks, atividade, tituloModulo, onClose }: 
           </Linha2>
           {form.tipo_acesso === 'Pago' && (
             <Campo label="Nº de prestações permitidas"><TextField type="number" min="1" value={form.num_prestacoes} onChange={(e) => setForm((f) => ({ ...f, num_prestacoes: e.target.value }))} /></Campo>
+          )}
+          {form.tipo_acesso === 'Pago' && (
+            <CampoCoordenadasBancarias valor={form} onChange={(v) => setForm((f) => ({ ...f, ...v }))} />
           )}
 
           <Linha2>

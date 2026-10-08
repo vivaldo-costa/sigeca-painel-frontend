@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ChevronLeft, Loader2, FileCheck, Upload, CircleCheck, CircleX, RotateCcw, Award, HeartHandshake, Search } from 'lucide-react'
+import { ChevronLeft, Loader2, FileCheck, Upload, CircleCheck, CircleX, RotateCcw, Award, HeartHandshake, Search, Hourglass } from 'lucide-react'
 import {
   useCandidatoDirigente, useAceitarTermoEtica, useAdicionarDocumentoCandidato,
   useRegistarDecisao, useResubmeterCandidato, useEmitirCertificado, useRegistarPromessa,
@@ -12,11 +12,9 @@ import { Card } from '@/components/ui/Card'
 import { uploadUrl } from '@/lib/uploads'
 import { notificar } from '@/lib/notificar'
 import {
-  LABEL_ESTADO_CANDIDATO, ETAPA_POR_ESTADO, LABEL_ETAPA, CHECKLIST_PADRAO,
-  type EstadoCandidato, type TipoDocumentoCandidato, type DecisaoValidacao,
+  LABEL_ESTADO_CANDIDATO, ETAPA_POR_ESTADO, LABEL_ETAPA, CHECKLIST_PADRAO, SEQUENCIA_VALIDACAO as SEQUENCIA, QUEM_DECIDE_ETAPA,
+  type TipoDocumentoCandidato, type DecisaoValidacao,
 } from '@/types/candidatoDirigente'
-
-const SEQUENCIA: EstadoCandidato[] = ['em_validacao_paroco', 'em_aprovacao_vicarial', 'em_validacao_diocesana', 'na_lista_candidatos']
 
 const LABEL_TIPO_DOC: Record<TipoDocumentoCandidato, string> = {
   parecer_direccao_agrupamento: 'Parecer da Direcção do Agrupamento',
@@ -53,6 +51,8 @@ export function CandidatoDetalhePage() {
 
   const etapaActual = ETAPA_POR_ESTADO[candidato.estado]
   const indiceActual = SEQUENCIA.indexOf(candidato.estado)
+  // A API diz se é a vez deste utilizador (perfil + agrupamento/paróquia ou papel territorial). Versões antigas da API não enviam o campo.
+  const podeValidar = candidato.pode_validar ?? true
   const todosConformes = CHECKLIST_PADRAO.every((c: { chave: string; label: string }) => checklist[c.chave]);
 
   function onEscolherFicheiro(e: React.ChangeEvent<HTMLInputElement>) {
@@ -182,10 +182,26 @@ export function CandidatoDetalhePage() {
         </div>
       </Card>
 
-      {/* Painel de decisão da etapa actual */}
-      {etapaActual && (
-        <Card className="mb-4 p-4">
-          <p className="mb-3 text-[12.5px] font-semibold text-muted">Validação — {LABEL_ETAPA[etapaActual]}</p>
+      {/* Quem decide a seguir — visível para todos */}
+      {etapaActual && !podeValidar && (
+        <Card className="mb-4 flex items-start gap-3 p-4">
+          <Hourglass className="mt-0.5 size-4 shrink-0 text-badge-blue-text" />
+          <div>
+            <p className="text-[12.5px] font-semibold text-text">A aguardar validação — {LABEL_ETAPA[etapaActual]}</p>
+            <p className="mt-0.5 text-[12px] text-subtle">
+              É a vez de {QUEM_DECIDE_ETAPA[etapaActual]}. Só quem tem esse perfil, no território do candidato, pode validar esta etapa.
+            </p>
+          </div>
+        </Card>
+      )}
+
+      {/* Painel de decisão da etapa actual — só para quem é a vez */}
+      {etapaActual && podeValidar && (
+        <Card className="mb-4 border-emerald-200 p-4">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-[12.5px] font-semibold text-muted">Validação — {LABEL_ETAPA[etapaActual]}</p>
+            <span className="rounded-full bg-badge-green-bg px-2.5 py-0.5 text-[10.5px] font-semibold text-badge-green-text">É a tua vez de validar</span>
+          </div>
 
           <div className="mb-3 space-y-1.5">
             {CHECKLIST_PADRAO.map((c: { chave: string; label: string }) => (

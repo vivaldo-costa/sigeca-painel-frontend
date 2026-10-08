@@ -1,11 +1,11 @@
 export type EstadoCandidato =
-  | 'registo_iniciado' | 'em_validacao_paroco' | 'em_aprovacao_vicarial' | 'em_validacao_diocesana'
+  | 'registo_iniciado' | 'em_validacao_chefe_agrupamento' | 'em_validacao_paroco' | 'em_aprovacao_vicarial' | 'em_validacao_diocesana'
   | 'devolvido_correcao' | 'rejeitado' | 'validado' | 'na_lista_candidatos' | 'selecionado_turma'
   | 'em_formacao' | 'formacao_concluida_aguardar_tutoria' | 'em_tutoria' | 'tutoria_concluida_relatorio_pendente'
   | 'relatorio_em_validacao' | 'tutoria_validada' | 'certificado_emitido_aguardar_promessa'
   | 'promessa_realizada' | 'processo_formativo_concluido'
 
-export type EtapaValidacao = 'assistente_paroco' | 'coordenacao_vicarial' | 'equipa_formacao_diocesana'
+export type EtapaValidacao = 'chefe_agrupamento' | 'assistente_paroco' | 'coordenacao_vicarial' | 'equipa_formacao_diocesana'
 export type DecisaoValidacao = 'validado' | 'devolvido' | 'rejeitado'
 export type TipoDocumentoCandidato = 'parecer_direccao_agrupamento' | 'bilhete_identidade' | 'cedula_baptismal' | 'outro'
 
@@ -74,10 +74,15 @@ export interface CandidatoDetalhe extends CandidatoResumo {
   validacoes: ValidacaoCandidato[]
   termo_etica: TermoEtica | null
   promessa?: PromessaDirigente | null
+  /** Etapa de validação em curso (null se o candidato já não está em validação). */
+  etapa_actual?: EtapaValidacao | null
+  /** O utilizador autenticado pode decidir nesta etapa? */
+  pode_validar?: boolean
 }
 
 export const LABEL_ESTADO_CANDIDATO: Record<EstadoCandidato, string> = {
   registo_iniciado: 'Registo Iniciado',
+  em_validacao_chefe_agrupamento: 'Em Validação — Chefe de Agrupamento',
   em_validacao_paroco: 'Em Validação — Assistente/Pároco',
   em_aprovacao_vicarial: 'Em Aprovação — Coordenação Vicarial',
   em_validacao_diocesana: 'Em Validação — Equipa de Formação Diocesana',
@@ -98,15 +103,30 @@ export const LABEL_ESTADO_CANDIDATO: Record<EstadoCandidato, string> = {
 }
 
 export const LABEL_ETAPA: Record<EtapaValidacao, string> = {
+  chefe_agrupamento: 'Chefe de Agrupamento',
   assistente_paroco: 'Assistente/Pároco',
   coordenacao_vicarial: 'Coordenação Vicarial',
   equipa_formacao_diocesana: 'Equipa de Formação Diocesana',
 }
 
 export const ETAPA_POR_ESTADO: Partial<Record<EstadoCandidato, EtapaValidacao>> = {
+  em_validacao_chefe_agrupamento: 'chefe_agrupamento',
   em_validacao_paroco: 'assistente_paroco',
   em_aprovacao_vicarial: 'coordenacao_vicarial',
   em_validacao_diocesana: 'equipa_formacao_diocesana',
+}
+
+/** Sequência da validação — do Chefe de Agrupamento até à Lista de Candidatos. */
+export const SEQUENCIA_VALIDACAO: EstadoCandidato[] = [
+  'em_validacao_chefe_agrupamento', 'em_validacao_paroco', 'em_aprovacao_vicarial', 'em_validacao_diocesana', 'na_lista_candidatos',
+]
+
+/** Quem decide em cada etapa — mostrado na interface ("a vez de…"). */
+export const QUEM_DECIDE_ETAPA: Record<EtapaValidacao, string> = {
+  chefe_agrupamento: 'o Chefe de Agrupamento do candidato',
+  assistente_paroco: 'o Assistente do agrupamento ou da paróquia',
+  coordenacao_vicarial: 'a Coordenação Vicarial',
+  equipa_formacao_diocesana: 'a Equipa de Formação Diocesana',
 }
 
 export const CHECKLIST_PADRAO: { chave: string; label: string }[] = [

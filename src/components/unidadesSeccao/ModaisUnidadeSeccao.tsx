@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { X, Loader2, UserPlus, Search } from 'lucide-react'
+import { X, Loader2, UserPlus, Search, Printer } from 'lucide-react'
 import {
   useCriarUnidadeSeccao, extrairUnidadeExistente, useMembrosUnidadeSeccao, useAdicionarMembrosUnidade, useRetirarMembroUnidade,
 } from '@/hooks/useUnidadesSeccao'
@@ -11,6 +11,7 @@ import { formatarAgrupamento, inferirTipoUnidadeSeccao } from '@/lib/formatadore
 import { ExportarBotoes } from '@/components/ui/ExportarBotoes'
 import { LABEL_TIPO_UNIDADE_SECCAO, type TipoUnidadeSeccao, type UnidadeSeccao } from '@/types/unidadeSeccao'
 import { cn } from '@/lib/cn'
+import { imprimirUnidadesSeccao } from '@/lib/imprimirUnidadesSeccao'
 
 const AJUDA_TIPO: Record<TipoUnidadeSeccao, string> = {
   bando: 'Lobitos (Alcateia)',
@@ -106,10 +107,26 @@ export function ModalMembrosUnidade({ unidade, onClose }: { unidade: UnidadeSecc
             <p className="text-[12px] text-subtle">{membros?.length ?? 0} membro(s) na tua área</p>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={isLoading}
+              onClick={() => {
+                if (!membros?.length) { notificar.aviso('Não há membros para imprimir.'); return }
+                imprimirUnidadesSeccao([{ tipo: unidade.tipo, nome: unidade.nome, membros }], {
+                  titulo: `Lista de membros — ${rotulo} ${unidade.nome}`,
+                  nomeFicheiro: `lista-${unidade.tipo}-${unidade.nome}`,
+                })
+              }}
+              title="Imprimir lista de membros (PDF)"
+              className="flex items-center gap-1 rounded-md border border-border bg-white px-2 py-1.5 text-[11.5px] font-medium text-text hover:bg-bg disabled:opacity-50"
+            >
+              <Printer className="size-3" /> Imprimir lista
+            </button>
             <ExportarBotoes tamanho="sm" nomeFicheiro={`${unidade.tipo}-${unidade.nome}`} titulo={`${rotulo} ${unidade.nome}`}
               colunas={[
                 { titulo: 'Nome', valor: (m: { nome: string }) => m.nome },
                 { titulo: 'Nº SIGECA', valor: (m: { codigo_associado: string }) => m.codigo_associado },
+                { titulo: 'Cargo/Função', valor: (m: { cargo_funcao?: string | null }) => m.cargo_funcao || '—' },
                 { titulo: 'Secção', valor: (m: { seccao_nome: string | null }) => m.seccao_nome ?? '—' },
                 { titulo: 'Agrupamento', valor: (m: { agrupamento_nome: string | null; ab_agrupamento: string | null }) => (m.agrupamento_nome ? formatarAgrupamento({ nome: m.agrupamento_nome, ab_agrupamento: m.ab_agrupamento }) : '—') },
               ]}

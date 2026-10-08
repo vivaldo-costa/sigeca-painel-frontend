@@ -8,6 +8,9 @@ export interface FormadorPainel {
   ativo: number
   total_cursos: number
   created_at: string
+  responsavel_formacao_diocese?: number
+  diocese_id?: number | null
+  diocese_nome?: string | null
 }
 
 export interface CursoDoFormador {
@@ -29,4 +32,6 @@ export interface FormadorFormPayload {
   certificacoes: string
   biografia: string
   ativo: boolean
+  responsavel_formacao_diocese: boolean
+  diocese_id: number | null
 }

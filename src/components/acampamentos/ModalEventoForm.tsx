@@ -3,6 +3,7 @@ import { X, Loader2 } from 'lucide-react'
 import { useCriarAcampamento, useAtualizarAcampamento } from '@/hooks/useAcampamentos'
 import { getApiErrorMessage } from '@/lib/api'
 import { CampoAbrangencia } from '@/components/atividades/CampoAbrangencia'
+import { CampoCoordenadasBancarias } from '@/components/atividades/CampoCoordenadasBancarias'
 import { Button } from '@/components/ui/Button'
 import { Campo, Linha2, TextField, SelectField } from '@/components/crud/FormShell'
 import type { EventoDetalhe, EventoFormPayload, NivelOrganizador } from '@/types/acampamento'
@@ -28,6 +29,9 @@ function paraForm(e: EventoDetalhe | null): EventoFormPayload {
     valor: e?.valor ?? '',
     director_id: e?.director_id ?? '',
     ativo: e ? !!e.ativo : true,
+    banco: e?.banco ?? '',
+    iban: e?.iban ?? '',
+    titular_conta: e?.titular_conta ?? '',
   }
 }
 
@@ -100,6 +104,8 @@ export function ModalEventoForm({ evento, onClose }: Props) {
           </Linha2>
 
           <Campo label="Taxa de inscrição (Kz)"><TextField type="number" step="0.01" value={form.valor} onChange={(e) => setForm((f) => ({ ...f, valor: e.target.value }))} /></Campo>
+
+          <CampoCoordenadasBancarias valor={form} onChange={(v) => setForm((f) => ({ ...f, ...v }))} />
 
           <div className="flex gap-3 border-t border-border pt-4">
             <Button type="button" variant="secondary" onClick={onClose} className="flex-1">Cancelar</Button>
