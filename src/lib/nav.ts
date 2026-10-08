@@ -65,8 +65,8 @@ export const NAV_SECTIONS: NavSection[] = [
       {
         label: 'Formação', modulo: 'Formações', icon: GraduationCap,
         items: [
-          // 'Formações' (/formacoes) e 'Cursos' (/cursos) — módulo genérico antigo, retirado do menu a pedido
-          // da Coordenação (as rotas continuam a existir). A formação de dirigentes faz-se nos itens abaixo.
+          { label: 'Formações', to: '/formacoes' },
+          { label: 'Cursos', to: '/cursos' },
           { label: 'Catálogo de Formações', to: '/catalogo-formacoes', modulo: 'CatalogoFormacoes' },
           { label: 'Formadores', to: '/formadores', modulo: 'Formadores' },
           { label: 'Percurso Formativo — Candidatos a Dirigente', to: '/candidatos-dirigente', modulo: 'PercursoFormativo' },
