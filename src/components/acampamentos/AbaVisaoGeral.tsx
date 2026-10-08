@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Pencil, ChevronRight, Upload, Trash2, FileText } from 'lucide-react'
 import { useMudarEstadoEvento, useAdicionarDocumentoEvento, useRemoverDocumentoEvento } from '@/hooks/useAcampamentos'
 import { Card } from '@/components/ui/Card'
-import { uploadUrl } from '@/lib/uploads'
 import { ESTADOS_EVENTO, type EventoDetalhe } from '@/types/acampamento'
+import { LinkFicheiroProtegido } from '@/components/ui/LinkFicheiroProtegido'
 
 const LABEL_ESTADO: Record<string, string> = {
   preparacao: 'Preparação', inscricoes_abertas: 'Inscrições abertas', em_curso: 'Em curso',
@@ -86,9 +86,9 @@ export function AbaVisaoGeral({ evento, onEditar }: Props) {
         <div className="space-y-1.5">
           {evento.documentos.map((d) => (
             <div key={d.id} className="flex items-center justify-between rounded-lg bg-bg px-3 py-2 text-[12.5px]">
-              <a href={uploadUrl('eventos-documentos', d.path) ?? '#'} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-text hover:underline">
+              <LinkFicheiroProtegido pasta="eventos-documentos" nome={d.path} nomeFicheiro={d.nome_ficheiro} className="flex items-center gap-1.5 text-text hover:underline">
                 <FileText className="size-3.5 text-subtle" /> {d.nome_ficheiro} <span className="text-[10.5px] text-subtle">({d.tipo})</span>
-              </a>
+              </LinkFicheiroProtegido>
               <button onClick={() => removerDocumento.mutate(d.id)} className="text-red-400 hover:text-red-600"><Trash2 className="size-3.5" /></button>
             </div>
           ))}

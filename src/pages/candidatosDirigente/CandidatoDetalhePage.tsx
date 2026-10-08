@@ -6,11 +6,10 @@ import {
   useRegistarDecisao, useResubmeterCandidato, useEmitirCertificado, useRegistarPromessa,
 } from '@/hooks/useCandidatosDirigente'
 import { useUtilizadores } from '@/hooks/useUtilizadores'
-import { API_BASE_URL } from '@/lib/apiUrl'
 import { getApiErrorMessage } from '@/lib/api'
 import { Card } from '@/components/ui/Card'
-import { uploadUrl } from '@/lib/uploads'
 import { notificar } from '@/lib/notificar'
+import { LinkFicheiroProtegido } from '@/components/ui/LinkFicheiroProtegido'
 import {
   LABEL_ESTADO_CANDIDATO, ETAPA_POR_ESTADO, LABEL_ETAPA, CHECKLIST_PADRAO, SEQUENCIA_VALIDACAO as SEQUENCIA, QUEM_DECIDE_ETAPA,
   type TipoDocumentoCandidato, type DecisaoValidacao,
@@ -174,9 +173,9 @@ export function CandidatoDetalhePage() {
         </div>
         <div className="space-y-1.5">
           {candidato.documentos.map((d) => (
-            <a key={d.id} href={uploadUrl('candidatos-dirigente-documentos', d.path) ?? '#'} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 rounded-lg bg-bg px-3 py-2 text-[12.5px] text-text hover:underline">
+            <LinkFicheiroProtegido key={d.id} pasta="candidatos-dirigente-documentos" nome={d.path} nomeFicheiro={d.nome_ficheiro} className="flex items-center gap-1.5 rounded-lg bg-bg px-3 py-2 text-[12.5px] text-text hover:underline">
               <FileCheck className="size-3.5 text-subtle" /> {d.nome_ficheiro} <span className="text-[10.5px] text-subtle">({LABEL_TIPO_DOC[d.tipo]})</span>
-            </a>
+            </LinkFicheiroProtegido>
           ))}
           {candidato.documentos.length === 0 && <p className="text-[12px] text-subtle">Nenhum documento anexado ainda.</p>}
         </div>
@@ -294,13 +293,13 @@ export function CandidatoDetalhePage() {
       {candidato.certificado_id && (
         <Card className="mb-4 p-4">
           <p className="mb-2 text-[12.5px] font-semibold text-muted">Certificado emitido</p>
-          <a
-            href={`${API_BASE_URL}/certificados/${candidato.certificado_id}/pdf`}
-            target="_blank" rel="noreferrer"
+          <LinkFicheiroProtegido
+            url={`/certificados/${candidato.certificado_id}/pdf`}
+            nomeFicheiro={`certificado-${candidato.certificado_id}.pdf`}
             className="flex w-fit items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-[12px] font-medium text-text transition-colors hover:bg-bg"
           >
             <Award className="size-3.5" /> Ver Certificado
-          </a>
+          </LinkFicheiroProtegido>
         </Card>
       )}
 

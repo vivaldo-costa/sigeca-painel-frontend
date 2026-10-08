@@ -6,8 +6,8 @@ import { notificar } from '@/lib/notificar'
 import { ESTADOS_INSCRICAO_EVENTO, LABEL_ESTADO_INSCRICAO, type EstadoInscricaoEvento, type DadosParticipante } from '@/types/eventoInscricao'
 import { InscricaoStepper } from '@/components/acampamentos/InscricaoStepper'
 import { useEventoPagamentos, useRegistarPagamento, useConfirmarPagamento, useRejeitarPagamento } from '@/hooks/useEventoPagamentos'
-import { uploadUrl } from '@/lib/uploads'
 import { LABEL_METODO_PAGAMENTO, type MetodoPagamentoEvento, type EstadoPagamentoEvento } from '@/types/eventoFinancas'
+import { LinkFicheiroProtegido } from '@/components/ui/LinkFicheiroProtegido'
 
 const ESTADO_PAGAMENTO: Record<EstadoPagamentoEvento, { rotulo: string; cor: string }> = {
   pendente: { rotulo: 'Pendente', cor: 'bg-amber-50 text-amber-700' },
@@ -212,7 +212,7 @@ function SeccaoPagamentos({ atividadeId, inscricaoId }: { atividadeId: number; i
                   {p.estado === 'rejeitado' && p.rejeitado_por_nome && ` · rejeitado por ${p.rejeitado_por_nome}`}
                   {p.estado === 'rejeitado' && p.rejeitado_em && ` a ${new Date(p.rejeitado_em).toLocaleDateString('pt-PT')}`}
                   {p.comprovativo_path && (
-                    <> · <a href={uploadUrl('eventos-pagamentos', p.comprovativo_path)!} target="_blank" rel="noreferrer" className="font-medium text-text underline">ver comprovativo</a></>
+                    <> · <LinkFicheiroProtegido pasta="eventos-pagamentos" nome={p.comprovativo_path} className="font-medium text-text underline">ver comprovativo</LinkFicheiroProtegido></>
                   )}
                 </p>
               </div>

@@ -12,10 +12,10 @@ import { useFormadores } from '@/hooks/useFormadores'
 import { usePermissao } from '@/hooks/usePermissao'
 import { getApiErrorMessage } from '@/lib/api'
 import { Card } from '@/components/ui/Card'
-import { API_BASE_URL } from '@/lib/apiUrl'
 import { formatarAgrupamento } from '@/lib/formatadores'
 import { LABEL_ESTADO_TURMA, LABEL_TIPO_DOC_TURMA, type PapelFormador, type TipoDocumentoTurma, type DecisaoAutorizacao } from '@/types/turmaFormacao'
 import { notificar } from '@/lib/notificar'
+import { LinkFicheiroProtegido } from '@/components/ui/LinkFicheiroProtegido'
 
 export function TurmaDetalhePage() {
   const { id } = useParams()
@@ -153,13 +153,13 @@ export function TurmaDetalhePage() {
           <div><dt className="text-subtle">Participantes</dt><dd className="text-text">{turma.participantes.length} / {limiteParticipantes}{turma.minimo_participantes ? ` (mín. ${turma.minimo_participantes})` : ''}</dd></div>
         </dl>
         {turma.numero_autorizacao && (
-          <a
-            href={`${API_BASE_URL}/turmas-formacao/${turma.id}/declaracao`}
-            target="_blank" rel="noreferrer"
+          <LinkFicheiroProtegido
+            url={`/turmas-formacao/${turma.id}/declaracao`}
+            nomeFicheiro={`Declaracao-${turma.numero_autorizacao}.pdf`}
             className="mt-3 flex w-fit items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-[12px] font-medium text-text transition-colors hover:bg-bg"
           >
             <Download className="size-3.5" /> Declaração de Autorização ({turma.numero_autorizacao})
-          </a>
+          </LinkFicheiroProtegido>
         )}
       </Card>
 
@@ -354,13 +354,13 @@ export function TurmaDetalhePage() {
         <Card className="mb-4 p-4">
           <p className="mb-2 text-[12.5px] font-semibold text-muted">Relatório de Formação</p>
           <p className="mb-2 text-[12.5px] text-text">{turma.relatorio.resumo}</p>
-          <a
-            href={`${API_BASE_URL}/turmas-formacao/${turma.id}/relatorio`}
-            target="_blank" rel="noreferrer"
+          <LinkFicheiroProtegido
+            url={`/turmas-formacao/${turma.id}/relatorio`}
+            nomeFicheiro={`Relatorio-${turma.codigo}.pdf`}
             className="flex w-fit items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-[12px] font-medium text-text transition-colors hover:bg-bg"
           >
             <Download className="size-3.5" /> Descarregar Relatório (PDF)
-          </a>
+          </LinkFicheiroProtegido>
         </Card>
       )}
 

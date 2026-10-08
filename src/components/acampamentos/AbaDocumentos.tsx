@@ -3,9 +3,9 @@ import { Upload, Trash2, FileText, Loader2 } from 'lucide-react'
 import { useEventoDocumentos, useCriarEventoDocumento, useRemoverEventoDocumento } from '@/hooks/useEventoDocumentos'
 import { getApiErrorMessage } from '@/lib/api'
 import { Card } from '@/components/ui/Card'
-import { uploadUrl } from '@/lib/uploads'
 import { LABEL_TIPO_DOCUMENTO_EVENTO, type TipoDocumentoEvento } from '@/types/eventoDocumento'
 import { notificar } from '@/lib/notificar'
+import { LinkFicheiroProtegido } from '@/components/ui/LinkFicheiroProtegido'
 
 export function AbaDocumentos({ atividadeId }: { atividadeId: number }) {
   const { data, isLoading } = useEventoDocumentos(atividadeId)
@@ -75,9 +75,9 @@ export function AbaDocumentos({ atividadeId }: { atividadeId: number }) {
             {data?.map((doc) => (
               <tr key={doc.id} className="hover:bg-bg">
                 <td className="px-3.5 py-2.5">
-                  <a href={uploadUrl('eventos-documentos', doc.path) ?? '#'} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 font-medium text-text hover:underline">
+                  <LinkFicheiroProtegido pasta="eventos-documentos" nome={doc.path} nomeFicheiro={doc.nome_ficheiro} className="flex items-center gap-1.5 font-medium text-text hover:underline">
                     <FileText className="size-3.5 text-subtle" /> {doc.nome_ficheiro}
-                  </a>
+                  </LinkFicheiroProtegido>
                 </td>
                 <td className="px-3.5 py-2.5 text-muted">{LABEL_TIPO_DOCUMENTO_EVENTO[doc.tipo]}</td>
                 <td className="px-3.5 py-2.5 text-muted">{doc.descricao ?? '—'}</td>

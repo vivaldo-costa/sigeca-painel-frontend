@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { X, Loader2, Paperclip, UserRound, EyeOff } from 'lucide-react'
 import { useDenunciaDetalhe, useMudarEstadoDenuncia } from '@/hooks/useDenuncias'
 import { getApiErrorMessage } from '@/lib/api'
-import { uploadUrl } from '@/lib/uploads'
 import { BadgeEstadoDenuncia } from './BadgeEstadoDenuncia'
 import type { EstadoDenuncia } from '@/types/denuncia'
 import { notificar } from '@/lib/notificar'
+import { LinkFicheiroProtegido } from '@/components/ui/LinkFicheiroProtegido'
 
 interface Props { id: number; onClose: () => void }
 
@@ -62,13 +62,12 @@ export function ModalDenunciaDetalhe({ id, onClose }: Props) {
             </div>
 
             {data.anexo_path && (
-              <a
-                href={uploadUrl('denuncias', data.anexo_path)!}
-                target="_blank" rel="noreferrer"
+              <LinkFicheiroProtegido
+                pasta="denuncias" nome={data.anexo_path} nomeFicheiro={data.anexo_nome}
                 className="flex w-fit items-center gap-1.5 rounded-lg bg-bg px-3 py-1.5 text-[12px] font-medium text-badge-blue-text hover:underline"
               >
                 <Paperclip className="size-3.5" /> {data.anexo_nome ?? 'Ver anexo'}
-              </a>
+              </LinkFicheiroProtegido>
             )}
 
 

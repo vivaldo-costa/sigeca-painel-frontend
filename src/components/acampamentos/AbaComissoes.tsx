@@ -8,9 +8,9 @@ import {
 } from '@/hooks/useEventoComissoes'
 import { useUtilizadores } from '@/hooks/useUtilizadores'
 import { Card } from '@/components/ui/Card'
-import { uploadUrl } from '@/lib/uploads'
 import { cn } from '@/lib/cn'
 import { COMISSOES_SUGERIDAS, type EstadoTarefa } from '@/types/eventoComissao'
+import { LinkFicheiroProtegido } from '@/components/ui/LinkFicheiroProtegido'
 
 export function AbaComissoes({ atividadeId }: { atividadeId: number }) {
   const { data: comissoes } = useEventoComissoes(atividadeId)
@@ -165,9 +165,9 @@ function DetalheComissao({ comissaoId }: { comissaoId: number }) {
         </div>
         <div className="space-y-1">
           {documentos?.map((d) => (
-            <a key={d.id} href={uploadUrl('comissoes-documentos', d.path) ?? '#'} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 rounded-lg bg-bg px-3 py-1.5 text-[12.5px] text-text hover:underline">
+            <LinkFicheiroProtegido key={d.id} pasta="comissoes-documentos" nome={d.path} nomeFicheiro={d.nome_ficheiro} className="flex items-center gap-1.5 rounded-lg bg-bg px-3 py-1.5 text-[12.5px] text-text hover:underline">
               <FileText className="size-3.5 text-subtle" /> {d.nome_ficheiro}
-            </a>
+            </LinkFicheiroProtegido>
           ))}
           {documentos?.length === 0 && <p className="text-[12px] text-subtle">Nenhum documento.</p>}
         </div>

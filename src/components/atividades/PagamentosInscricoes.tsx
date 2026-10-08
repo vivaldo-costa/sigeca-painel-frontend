@@ -5,10 +5,10 @@ import {
   type BasePagamentosInscricoes, type EstadoPagamentoInscricao, type PagamentoInscricao,
 } from '@/hooks/usePagamentosInscricoes'
 import { usePermissao } from '@/hooks/usePermissao'
-import { uploadUrl } from '@/lib/uploads'
 import { getApiErrorMessage } from '@/lib/api'
 import { notificar } from '@/lib/notificar'
 import { cn } from '@/lib/cn'
+import { LinkFicheiroProtegido } from '@/components/ui/LinkFicheiroProtegido'
 
 const MODULO: Record<BasePagamentosInscricoes, string> = {
   '/acampamentos': 'Acampamentos',
@@ -94,7 +94,6 @@ export function PagamentosInscricoes({ base, atividadeId }: { base: BasePagament
 
       <div className="space-y-2">
         {lista.map((p) => {
-          const url = uploadUrl('comprovativos_inscricao', p.comprovativo_path)
           return (
             <div key={p.id} className="rounded-xl border border-border p-3 text-[12.5px]">
               <div className="flex flex-wrap items-start gap-3">
@@ -114,10 +113,10 @@ export function PagamentosInscricoes({ base, atividadeId }: { base: BasePagament
               </div>
 
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                {url ? (
-                  <a href={url} target="_blank" rel="noreferrer" className="flex items-center gap-1 rounded-md border border-border bg-white px-2 py-1 text-[11.5px] font-medium text-text hover:bg-bg">
+                {p.comprovativo_path ? (
+                  <LinkFicheiroProtegido pasta="comprovativos_inscricao" nome={p.comprovativo_path} nomeFicheiro={p.comprovativo_nome} className="flex items-center gap-1 rounded-md border border-border bg-white px-2 py-1 text-[11.5px] font-medium text-text hover:bg-bg">
                     <FileText className="size-3" /> {p.comprovativo_nome || 'Ver comprovativo'}
-                  </a>
+                  </LinkFicheiroProtegido>
                 ) : <span className="text-[11.5px] text-subtle">Sem comprovativo anexado</span>}
                 {p.estado === 'pendente' && podeValidar && (
                   <>

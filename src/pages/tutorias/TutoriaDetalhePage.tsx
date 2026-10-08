@@ -8,9 +8,9 @@ import {
 import { useAuthStore } from '@/store/auth'
 import { getApiErrorMessage } from '@/lib/api'
 import { Card } from '@/components/ui/Card'
-import { uploadUrl } from '@/lib/uploads'
 import { LABEL_ESTADO_PRAZO, COR_ESTADO_PRAZO, CRITERIOS_RELATORIO_TUTORIA, type DecisaoTutoria } from '@/types/tutoria'
 import { notificar } from '@/lib/notificar'
+import { LinkFicheiroProtegido } from '@/components/ui/LinkFicheiroProtegido'
 
 export function TutoriaDetalhePage() {
   const { id } = useParams()
@@ -143,9 +143,9 @@ export function TutoriaDetalhePage() {
         </div>
         <div className="space-y-1.5">
           {tutoria.documentos.map((d) => (
-            <a key={d.id} href={uploadUrl('tutorias-evidencias', d.path) ?? '#'} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 rounded-lg bg-bg px-3 py-2 text-[12.5px] text-text hover:underline">
+            <LinkFicheiroProtegido key={d.id} pasta="tutorias-evidencias" nome={d.path} nomeFicheiro={d.nome_ficheiro} className="flex items-center gap-1.5 rounded-lg bg-bg px-3 py-2 text-[12.5px] text-text hover:underline">
               <FileCheck className="size-3.5 text-subtle" /> {d.nome_ficheiro}
-            </a>
+            </LinkFicheiroProtegido>
           ))}
           {tutoria.documentos.length === 0 && <p className="text-[12px] text-subtle">Nenhuma evidência anexada ainda.</p>}
         </div>

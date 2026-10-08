@@ -11,6 +11,7 @@ import { uploadUrl } from '@/lib/uploads'
 import { getApiErrorMessage } from '@/lib/api'
 import { notificar } from '@/lib/notificar'
 import { STATUS_LABEL, type FiltrosPedidos, type StatusPedido, type StatusLinha, type PedidoPainel, type EstadoStockPedido } from '@/types/pedidoPainel'
+import { LinkFicheiroProtegido } from '@/components/ui/LinkFicheiroProtegido'
 
 const ESTADOS_PEDIDO: StatusPedido[] = ['pendente', 'aguardando_pagamento', 'pago', 'pronto', 'enviado', 'entregue', 'cancelado']
 const ROTULO_PEDIDO = STATUS_LABEL
@@ -237,9 +238,9 @@ export function EncomendasLista() {
                     </span>
                   )}
                   {comprovativo && (
-                    <a href={uploadUrl('comprovativos_pedidos', comprovativo)!} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-badge-blue-text hover:underline">
+                    <LinkFicheiroProtegido pasta="comprovativos_pedidos" nome={comprovativo} className="flex items-center gap-1.5 text-badge-blue-text hover:underline">
                       <FileText className="size-3" /> Ver comprovativo
-                    </a>
+                    </LinkFicheiroProtegido>
                   )}
                 </div>
               )}
